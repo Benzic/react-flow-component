@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useRef } from 'react'
-import { FlowProps } from '../interface'
+import { FlowProps } from '../types/index'
 import { dragSelect, drawLine } from '../drawCanvas'
 import action from '../actions'
 const MultipleFlow: React.FC<FlowProps> = ({ selectedKeys = [], mode, rectConfig, lineCofig, onChange, onEdit }) => {

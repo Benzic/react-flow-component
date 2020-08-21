@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './modal.css'
+import './modal.less'
 interface IProps {
     title?: string,
     visible?: boolean,

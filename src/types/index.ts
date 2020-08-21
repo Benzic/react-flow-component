@@ -1,13 +1,13 @@
 /*
  * @Author: your name
  * @Date: 2020-08-06 10:50:12
- * @LastEditTime: 2020-08-07 13:59:29
+ * @LastEditTime: 2020-08-21 16:54:04
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\components\flowCom\index.d.ts
  */
 export interface FlowProps {
-    selectedKeys: itemKey[],
+    selectedKeys?: itemKey[],
     rectConfig?: rectCofig,
     lineCofig?: lineCofig,
     mode?: string,

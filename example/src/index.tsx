@@ -1,15 +1,8 @@
-/*
- * @Author: your name
- * @Date: 2020-08-07 14:04:20
- * @LastEditTime: 2020-08-07 15:24:25
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: \react-flow-component\src\index.js
- */
-import React, { useState, useRef } from 'react';
-import { render } from "react-dom";
-import { MultipleFlow, SingleFlow, FlowModal } from "./lib";
-import './index.css'
+import React, { useCallback, useRef, useState } from 'react';
+import { render } from 'react-dom';
+// import Renderer from '../../dist';
+import { MultipleFlow } from '../../src/index';
+import './index.less'
 const treeData = [
     {
         title: '检测集中性分析',
@@ -82,7 +75,7 @@ const treeData = [
         ],
     },
 ];
-const App = (() => {
+const App: React.SFC = () => {
     const [selectedKeys, setSelectedKeys] = useState([]);
     const [zIndex, setZindex] = useState(0)
     const [currentKey, setCurrentKey] = useState(null)
@@ -144,13 +137,12 @@ const App = (() => {
                 })
             }
         </div>
-        <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: "10", background: "#ddd" }}>
+        <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: 10, background: "#ddd" }}>
             <MultipleFlow selectedKeys={selectedKeys}></MultipleFlow>
         </div>
         {/* <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: "10", background: "#ddd" }}>
-            <SingleFlow selectedKeys={selectedKeys}></SingleFlow>
-        </div> */}
-    </div>
-})
-
-render(<App />, document.getElementById("root"));
+        <SingleFlow selectedKeys={selectedKeys}></SingleFlow>
+    </div> */}
+    </div>;
+};
+render(<App />, document.querySelector('#app'));

@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useRef } from 'react'
-import { FlowProps } from '../interface'
+import { FlowProps } from '../types/index'
 import { dragSelect } from '../drawCanvas'
 import action from '../actions'
 const SingleFlow: React.FC<FlowProps> = ({ selectedKeys = [], rectConfig, lineCofig, onChange, onEdit }) => {

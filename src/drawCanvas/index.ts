@@ -1,13 +1,13 @@
 /*
  * @Author: your name
  * @Date: 2020-08-06 15:21:59
- * @LastEditTime: 2020-08-07 10:24:49
+ * @LastEditTime: 2020-08-21 16:54:40
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\components\flowCom\drawCanvas.ts
  */
 // import { textProps, selectProps, rectProps, triangleProps, lineProps } from './drawCanvasInterface'
-export function drawText<textProps>(rectCfg: any, ctx: any, x: any, y: any, title?: any, active?: any) {
+export function drawText(rectCfg: any, ctx: any, x: any, y: any, title?: any, active?: any) {
     ctx.fillStyle = "black";
     ctx.font = rectCfg?.fontSize ? rectCfg?.fontSize + ' Arial' : '12px Arial'
     active && (ctx.fillStyle = "white");

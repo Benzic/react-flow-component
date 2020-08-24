@@ -1,27 +1,33 @@
 {
   "name": "react-flow-component",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "a work-flow component for react",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "start": "cross-env NODE_ENV=development webpack-dev-server --open",
+    "build": "cross-env NODE_ENV=production npx webpack",
+    "play": "yarn build && yarn start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Benzic/react-flow-component.git"
+  },
+  "keywords": [
+    "flow"
+  ],
   "author": "benzic",
   "license": "MIT",
   "dependencies": {
     "@types/react": "^16.9.35",
     "@types/react-dom": "^16.9.8",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Benzic/react-flow-component.git"
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-      "dist"
-  ],
-  "scripts": {
-    "build": "cross-env NODE_ENV=production npx webpack",
-    "start": "cross-env NODE_ENV=development webpack-dev-server --open"
+    "react-dom": "^16.13.1",
+    "react-hook-form": "^5.7.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^3.0.0",
@@ -37,9 +43,9 @@
     "source-map-loader": "^0.2.4",
     "style-loader": "^1.2.1",
     "ts-loader": "^7.0.4",
-    "typescript": "^4.0.2",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12",
+    "typescript": "^3.9.2",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {

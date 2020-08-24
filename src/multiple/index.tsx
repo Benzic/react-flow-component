@@ -13,17 +13,21 @@ const MultipleFlow: React.FC<FlowProps> = ({ flowNodes = [], rectConfig, lineCof
   useEffect(() => {
     window.addEventListener('keydown', action.checkKeyDown, true);
     if (rectConfig?.edit) {
-      window.addEventListener('dblclick', () => {
-        const rectIndex = action.getRectIndex(action.activeMoveRect)
-        const node = {
-          node: action.nodes[rectIndex],
-          index: rectIndex
+      window.addEventListener('mouseup', () => {
+        if ((new Date()).getTime() - action.lastMouseUpTime < 250) {
+          action.singleClick = false
+          const rectIndex = action.getRectIndex(action.activeMoveRect)
+          const node = {
+            node: action.nodes[rectIndex],
+            index: rectIndex
+          }
+          onDBClick && onDBClick(node)
         }
-        onDBClick && onDBClick(node)
+        action.lastMouseUpTime = (new Date()).getTime()
       }, true);
     }
     return () => {
-      window.removeEventListener('dblclick', null)
+      window.removeEventListener('mouseup', null)
       window.removeEventListener('keydown', null)
     }
   }, [rectConfig.edit])
@@ -101,7 +105,7 @@ const MultipleFlow: React.FC<FlowProps> = ({ flowNodes = [], rectConfig, lineCof
     onDragRect();
   }, [onDragRect, onChange])
   useEffect(() => {
-    if (wrapper.current) {
+    if (wrapper.current && !action.canvas) {
       action.canvas = canvas.current
       canvas.current.width = wrapper.current.offsetWidth;
       canvas.current.height = wrapper.current.offsetHeight

@@ -13,17 +13,21 @@ const SingleFlow: React.FC<FlowProps> = ({ flowNodes = [], rectConfig, lineCofig
   useEffect(() => {
     window.addEventListener('keydown', action.checkKeyDown, true);
     if (rectConfig?.edit) {
-      window.addEventListener('dblclick', () => {
-        const rectIndex = action.getRectIndex(action.activeMoveRect)
-        const node = {
-          node: action.nodes[rectIndex],
-          index: rectIndex
+      window.addEventListener('mouseup', () => {
+        if ((new Date()).getTime() - action.lastMouseUpTime < 250) {
+          action.singleClick = false
+          const rectIndex = action.getRectIndex(action.activeMoveRect)
+          const node = {
+            node: action.nodes[rectIndex],
+            index: rectIndex
+          }
+          onDBClick && onDBClick(node)
         }
-        onDBClick && onDBClick(node)
+        action.lastMouseUpTime = (new Date()).getTime()
       }, true);
     }
     return () => {
-      window.removeEventListener('dblclick', null)
+      window.removeEventListener('mouseup', null)
       window.removeEventListener('keydown', null)
     }
   }, [rectConfig.edit])

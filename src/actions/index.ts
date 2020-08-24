@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-08-06 15:21:59
- * @LastEditTime: 2020-08-24 14:12:17
+ * @LastEditTime: 2020-08-24 18:16:12
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\components\flowCom\drawCanvas.ts
@@ -14,6 +14,7 @@ const action: any = {
   activeLines: [],
   singleClick: true,
   lastClickTime: null,
+  lastMouseUpTime: null,
   mouseDownXY: { x: 0, y: 0 },
   selectArea: { startX: 0, startY: 0, endX: 0, endY: 0 },
   nodes: [],

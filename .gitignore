@@ -1,7 +1,3 @@
 yarn.lock
 *.log
-
-lib/**/*
-dist
-example/dist
 node_modules

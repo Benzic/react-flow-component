@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { render } from 'react-dom';
 // import Renderer from '../../dist';
 import { MultipleFlow } from '../../src/index';
@@ -83,9 +83,8 @@ const App: React.SFC = () => {
   const [editKey, setEditKey] = useState(null)
   const dragBox = useRef(null)
   window.ondragstart = function (event) {
-    console.log(event)
     setZindex(100)
-    var evt = event || window.event;
+    const evt = event || window.event;
     setCurrentKey({
       x: evt.clientX - evt.target.offsetLeft,
       y: evt.clientY - evt.target.offsetTop,
@@ -100,8 +99,8 @@ const App: React.SFC = () => {
     event.preventDefault()
   }
   window.ondrop = function (event) {
-    var evt = event || window.event;
-    var offset_x = currentKey.x, offset_y = currentKey.y;//偏移
+    const evt = event || window.event;
+    const offset_x = currentKey.x, offset_y = currentKey.y;//偏移
     evt.preventDefault();
     setZindex(0)
     if (!JSON.stringify(selectedKeys).includes('"key":"' + currentKey.key + '"')) {
@@ -138,7 +137,13 @@ const App: React.SFC = () => {
       }
     </div>
     <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: 10, background: "#ddd" }}>
-      <MultipleFlow selectedKeys={selectedKeys}></MultipleFlow>
+      <MultipleFlow onDBClick={(val) => {
+        console.log(val)
+      }} rectConfig={{
+        edit: true
+      }} flowNodes={selectedKeys} onChange={(val)=>{
+        console.log(val)
+      }}></MultipleFlow>
     </div>
     {/* <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: "10", background: "#ddd" }}>
         <SingleFlow selectedKeys={selectedKeys}></SingleFlow>

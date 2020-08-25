@@ -7,7 +7,7 @@ export interface FlowProps {
 }
 export interface rectCofigType {
     activeBgColor?: string;
-    BgColor?: string;
+    bgColor?: string;
     corner?: number;
     width?: number;
     height?: number;
@@ -17,6 +17,8 @@ export interface rectCofigType {
     xText?: number;
     yText?: number;
     edit?: boolean;
+    autoY?: number;
+    autoX?: number;
 }
 export interface lineCofigType {
     activeColor?: string;

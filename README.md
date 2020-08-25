@@ -1,11 +1,3 @@
-<!--
- * @Author: your name
- * @Date: 2020-08-24 09:30:05
- * @LastEditTime: 2020-08-25 16:21:29
- * @LastEditors: your name
- * @Description: In User Settings Edit
- * @FilePath: \react-flow-component\README.md
--->
 # React-flow-component
 基于react+typescript开发，react生态下的work-flow组件，提供单根节点的SingleFlow组件和不限制根节点的MultipleFlow组件。
 
@@ -53,7 +45,7 @@ yarn add react-flow-component
 |  参数   | 说明  | 类型| 默认值|
 |  ----  | ----  |  ----  | ----  |
 | activeBgColor  |节点激活背景颜色  | string | #40a9ff|
-| BgColor  | 节点背景颜色 |string  | #ffffff |
+| bgColor  | 节点背景颜色 |string  | #ffffff |
 | corner  | 节点圆角(如果是正方形圆角为大于长宽一半则绘制节点为圆形) |number  | 0 |
 | width  | 节点宽度 |number  | 100 |
 | height  | 节点高度 |number | 30 |
@@ -63,7 +55,8 @@ yarn add react-flow-component
 | xText  | 节点显示文本X方向偏移 |number | 居中显示 |
 | yText  | 节点显示文本X方向偏移 |number | 距离中心位置向下偏移5px |
 | edit  | 节点是否支持编辑 |boolean | false |
-
+| autoX  | 节点是否支持编辑 |singleFlow子节点挂载到父节点后Y方向偏移得位置 | 100 |
+| autoY  | 节点是否支持编辑 |singleFlow子节点挂载到父节点后X方向偏移得位置 | 0 |
 ##### Flow连线的配置项 lineCofig
 |  参数   | 说明  | 类型| 默认值|
 |  ----  | ----  |  ----  | ----  |

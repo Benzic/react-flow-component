@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2020-08-24 09:30:05
- * @LastEditTime: 2020-08-25 11:29:56
+ * @LastEditTime: 2020-08-25 11:33:09
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \react-flow-component\README.md
@@ -18,11 +18,12 @@ npm i react-flow-compoent
 yarn add react-flow-component
 
 ### 引入
-``` import { MultipleFlow，SingleFlow } from 'react-flow-component' ```
+``` import { MultipleFlow，SingleFlow } from 'react-flow-component' ```  
+
 ``` <MultipleFlow rectConfig={{ width: 100, height:30 }} flowNodes={flowNodes}></MultipleFlow> ```
-##### MultipleFlow
+##### MultipleFlow 双击长按连线 单击拖动 双击编辑
 ![multipleFlow.gif](https://upload-images.jianshu.io/upload_images/2669301-b959212d1cd99bbd.gif?imageMogr2/auto-orient/strip)
-##### SingleFlow
+##### SingleFlow 单击拖动 双击编辑 
 ![singleFlow.gif](https://upload-images.jianshu.io/upload_images/2669301-216d197b5ab6619d.gif?imageMogr2/auto-orient/strip)
 
 ### API

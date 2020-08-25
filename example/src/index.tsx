@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { render } from 'react-dom';
 // import Renderer from '../../dist';
-import { MultipleFlow } from '../../src/index';
+import { MultipleFlow, SingleFlow } from '../../src/index';
 import './index.less'
 const treeData = [
   {
@@ -136,7 +136,7 @@ const App: React.SFC = () => {
         })
       }
     </div>
-    <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: 10, background: "#ddd" }}>
+    {/* <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: 10, background: "#ddd" }}>
       <MultipleFlow onDBClick={(val) => {
         console.log(val)
       }} rectConfig={{
@@ -144,10 +144,10 @@ const App: React.SFC = () => {
       }} flowNodes={selectedKeys} onChange={(val)=>{
         console.log(val)
       }}></MultipleFlow>
-    </div>
-    {/* <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: "10", background: "#ddd" }}>
-        <SingleFlow selectedKeys={selectedKeys}></SingleFlow>
     </div> */}
+    <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: 10, background: "#ddd" }}>
+      <SingleFlow rectConfig={{ edit: true }} flowNodes={selectedKeys}></SingleFlow>
+    </div>
   </div>;
 };
 render(<App />, document.querySelector('#app'));

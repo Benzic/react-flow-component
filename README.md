@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2020-08-24 09:30:05
- * @LastEditTime: 2020-08-25 10:47:29
+ * @LastEditTime: 2020-08-25 11:22:13
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \react-flow-component\README.md
@@ -10,6 +10,7 @@
 
 #React-flow-component
 基于react+typescript开发，react生态下的work-flow组件，提供单根节点的SingleFlow组件和不限制根节点的MultipleFlow组件。
+
 ###安装方法
 ##### npm安装
 npm i react-flow-compoent 
@@ -21,8 +22,9 @@ yarn add react-flow-component
 ```
     <MultipleFlow rectConfig={{ width: 100, height:30 }}></MultipleFlow>
 ```
-
+####MultipleFlow
 ![multipleFlow.gif](https://upload-images.jianshu.io/upload_images/2669301-b959212d1cd99bbd.gif?imageMogr2/auto-orient/strip)
+####SingleFlow
 ![singleFlow.gif](https://upload-images.jianshu.io/upload_images/2669301-216d197b5ab6619d.gif?imageMogr2/auto-orient/strip)
 
 ###API
@@ -57,7 +59,7 @@ yarn add react-flow-component
 | color  | 线条颜色 |string  | #ffffff |
 | width  | 线条宽度 |number  | 2 |
 
-#####Flow节点的配置项 lineCofig
+#####Flow节点的配置项 itemNodeType
 |  参数   | 说明  | 类型| 默认值|
 |  ----  | ----  |  ----  | ----  |
 | x  |flow节点初始X坐标 | string |必传|

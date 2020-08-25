@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-08-06 10:50:12
- * @LastEditTime: 2020-08-24 14:42:23
+ * @LastEditTime: 2020-08-25 16:07:55
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\components\flowCom\index.d.ts
@@ -15,7 +15,7 @@ export interface FlowProps {
 }
 export interface rectCofigType {
     activeBgColor?: string,                             //节点激活的背景颜色    默认#40a9ff
-    BgColor?: string,                                   //未激活背景颜色    默认白色
+    bgColor?: string,                                   //未激活背景颜色    默认白色
     corner?: number                                     //圆角(如果是正方形，圆角>长宽一半则绘制为圆形) 默认0
     width?: number,                                     //节点的宽度    默认100px
     height?: number,                                    //节点的高度    默认30px
@@ -26,6 +26,8 @@ export interface rectCofigType {
     yText?: number,                                     //节点文本Y方向的偏移   默认距离中心偏移5px
     // bgImg?: string,                                  //节点的背景图片（性能问题比较明显）
     edit?: boolean                                      //是否支持编辑  默认false
+    autoY?: number                                      //singleFlow 子节点挂载到父节点后Y方向偏移得位置    默认100
+    autoX?: number                                      //singleFlow 子节点挂载到父节点后X方向偏移得位置    默认0
 }
 export interface lineCofigType {
     activeColor?: string,                               //连线高亮颜色  默认#40a9ff

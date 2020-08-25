@@ -1,13 +1,11 @@
 <!--
  * @Author: your name
  * @Date: 2020-08-24 09:30:05
- * @LastEditTime: 2020-08-25 11:33:09
- * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2020-08-25 16:21:29
+ * @LastEditors: your name
  * @Description: In User Settings Edit
  * @FilePath: \react-flow-component\README.md
 -->
-
-
 # React-flow-component
 基于react+typescript开发，react生态下的work-flow组件，提供单根节点的SingleFlow组件和不限制根节点的MultipleFlow组件。
 
@@ -24,7 +22,22 @@ yarn add react-flow-component
 ##### MultipleFlow 双击长按连线 单击拖动 双击编辑
 ![multipleFlow.gif](https://upload-images.jianshu.io/upload_images/2669301-b959212d1cd99bbd.gif?imageMogr2/auto-orient/strip)
 ##### SingleFlow 单击拖动 双击编辑 
-![singleFlow.gif](https://upload-images.jianshu.io/upload_images/2669301-216d197b5ab6619d.gif?imageMogr2/auto-orient/strip)
+![singleFlow.gif](https://upload-images.jianshu.io/upload_images/2669301-4306d4c35360eeca.gif?imageMogr2/auto-orient/strip)
+
+##### 更改corner 修改样式  以下是直接全局统一配置flow节点样式，也可以单独配置flow节点样式
+```
+  <SingleFlow rectConfig={{
+        activeBgColor: "red",
+        bgColor: "green",
+        corner: 50,
+        width: 100,
+        height: 100,
+        autoY: 200
+      }} flowNodes={selectedKeys}></SingleFlow>
+```
+![changeConfig.gif](https://upload-images.jianshu.io/upload_images/2669301-d0dad9339abbeddc.gif?imageMogr2/auto-orient/strip)
+
+示例具体代码见：[https://github.com/Benzic/react-flow-component/blob/master/example/src/index.tsx](https://github.com/Benzic/react-flow-component/blob/master/example/src/index.tsx)
 
 ### API
 ##### FlowProps配置项
@@ -72,4 +85,7 @@ yarn add react-flow-component
 
 # 使用反馈
 希望有什么bug和意见都可以告诉我，谢谢。
+
+github地址：[https://github.com/Benzic/react-flow-component](https://github.com/Benzic/react-flow-component)
+
 

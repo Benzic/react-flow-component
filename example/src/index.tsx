@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
 import { render } from 'react-dom';
-// import Renderer from '../../dist';
 import { MultipleFlow, SingleFlow } from '../../src/index';
 import './index.less'
 const treeData = [
@@ -146,7 +145,14 @@ const App: React.SFC = () => {
       }}></MultipleFlow>
     </div> */}
     <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: 10, background: "#ddd" }}>
-      <SingleFlow rectConfig={{ edit: true }} flowNodes={selectedKeys}></SingleFlow>
+      <SingleFlow rectConfig={{
+        activeBgColor: "red",
+        bgColor: "green",
+        corner: 50,
+        width: 100,
+        height: 100,
+        autoY: 200
+      }} flowNodes={selectedKeys}></SingleFlow>
     </div>
   </div>;
 };

@@ -37,12 +37,12 @@ const SingleFlow: React.FC<FlowProps> = ({ flowNodes = [], rectConfig, lineCofig
       for (let j = action.nodes[i].to.length; j--;) {
         const rectIndex = action.getRectIndex(action.nodes[i].to[j])
         if (action.nodes[rectIndex].to.length) {
-          action.nodes[rectIndex].x = leftDis + (action.nodes[rectIndex].total / 2)
-          action.nodes[rectIndex].y = action.nodes[i].y + 100
+          action.nodes[rectIndex].x = leftDis + (action.nodes[rectIndex].total / 2) + (rectConfig?.autoX ?? 0)
+          action.nodes[rectIndex].y = action.nodes[i].y + (rectConfig?.autoY ?? 100)
           leftDis = leftDis + action.nodes[rectIndex].total
         } else {
-          action.nodes[rectIndex].x = leftDis + ((action.rectCfg?.width ?? 100) * 1.25) / 2
-          action.nodes[rectIndex].y = action.nodes[i].y + 100
+          action.nodes[rectIndex].x = leftDis + ((action.rectCfg?.width ?? 100) * 1.25) / 2 + (rectConfig?.autoX ?? 0)
+          action.nodes[rectIndex].y = action.nodes[i].y + (rectConfig?.autoY ?? 100)
           leftDis = leftDis + ((action.rectCfg?.width ?? 100) * 1.25)
         }
       }

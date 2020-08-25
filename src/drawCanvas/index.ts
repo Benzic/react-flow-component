@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-08-06 15:21:59
- * @LastEditTime: 2020-08-24 14:18:33
+ * @LastEditTime: 2020-08-25 16:03:17
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\components\flowCom\drawCanvas.ts
@@ -30,7 +30,7 @@ export function drawRoundedRect(rectCfg: rectCofigType, ctx: any, x: number, y: 
   ctx.arcTo(x - halfWidth, y + halfHeight, x - halfWidth, y + halfHeight - r, r);
   ctx.lineTo(x - halfWidth, y - halfHeight + r);
   ctx.arcTo(x - halfWidth, y - halfHeight, x - halfWidth + r, y - halfHeight, r);
-  ctx.fillStyle = rectCfg?.BgColor ?? "white";
+  ctx.fillStyle = rectCfg?.bgColor ?? "white";
   active && (ctx.fillStyle = rectCfg?.activeBgColor ?? "#40a9ff");
   ctx.fill()
   ctx.closePath();

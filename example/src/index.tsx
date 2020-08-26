@@ -139,6 +139,8 @@ const App: React.SFC = () => {
       <MultipleFlow onDBClick={(val) => {
         console.log(val)
       }} rectConfig={{
+        activeBgColor: "rgba(0,0,0,0.5)",
+        bgColor: "rgba(255,0,0,0.5)",
         edit: true
       }} flowNodes={selectedKeys} onChange={(val)=>{
         console.log(val)
@@ -146,12 +148,11 @@ const App: React.SFC = () => {
     </div> */}
     <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: 10, background: "#ddd" }}>
       <SingleFlow rectConfig={{
-        activeBgColor: "red",
-        bgColor: "green",
-        corner: 50,
-        width: 100,
-        height: 100,
-        autoY: 200
+        activeBgColor: "rgba(0,0,0,0.5)",
+        bgColor: "rgba(255,0,0,0.5)",
+        width: 300,
+        height: 50,
+        autoY: 100
       }} flowNodes={selectedKeys}></SingleFlow>
     </div>
   </div>;

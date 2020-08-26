@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-08-06 10:50:12
- * @LastEditTime: 2020-08-25 16:07:55
+ * @LastEditTime: 2020-08-26 15:16:16
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\components\flowCom\index.d.ts
@@ -22,8 +22,9 @@ export interface rectCofigType {
     xCorrecting?: number,                               //节点移动X方向的自动校正距离   默认10px
     yCorrecting?: number,                               //节点移动Y方向的自动校正距离   默认5px
     fontSize?: string,                                  //节点的字体大小    默认12px
-    xText?: number,                                     //节点文本的X方向偏移   默认居中展示
-    yText?: number,                                     //节点文本Y方向的偏移   默认距离中心偏移5px
+    txtColor?: string,                                  //节点的字体颜色    默认黑色
+    activeTxtColor?: string,                            //节点的高亮字体颜色    默认白色
+    align?: string,                                     //节点字体水平位置  默认居中
     // bgImg?: string,                                  //节点的背景图片（性能问题比较明显）
     edit?: boolean                                      //是否支持编辑  默认false
     autoY?: number                                      //singleFlow 子节点挂载到父节点后Y方向偏移得位置    默认100

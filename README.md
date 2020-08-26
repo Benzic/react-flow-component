@@ -52,11 +52,12 @@ yarn add react-flow-component
 | xCorrecting  | X方向移动校正位置 |number | 10|
 | yCorrecting  | Y方向移动校正位置 |number | 5 |
 | fontSize  | 节点显示文本的字体大小 |string | 12px |
-| xText  | 节点显示文本X方向偏移 |number | 居中显示 |
-| yText  | 节点显示文本X方向偏移 |number | 距离中心位置向下偏移5px |
+| txtColor| 节点的字体颜色 |string | #000000 |
+| activeTxtColor| 节点的高亮字体颜色 |string| #ffffff |
+| align| 节点字体水平位置 |string|水平垂直居中显示 left\|center \| right |
 | edit  | 节点是否支持编辑 |boolean | false |
-| autoX  | 节点是否支持编辑 |singleFlow子节点挂载到父节点后Y方向偏移得位置 | 100 |
-| autoY  | 节点是否支持编辑 |singleFlow子节点挂载到父节点后X方向偏移得位置 | 0 |
+| autoX  | singleFlow子节点挂载到父节点后X方向偏移的位置 |number | 100 |
+| autoY  | singleFlow子节点挂载到父节点后Y方向偏移的位置 |number | 0 |
 ##### Flow连线的配置项 lineCofig
 |  参数   | 说明  | 类型| 默认值|
 |  ----  | ----  |  ----  | ----  |

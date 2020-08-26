@@ -1,18 +1,31 @@
 /*
  * @Author: your name
  * @Date: 2020-08-06 15:21:59
- * @LastEditTime: 2020-08-25 16:03:17
+ * @LastEditTime: 2020-08-26 15:15:37
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\components\flowCom\drawCanvas.ts
  */
 import { rectCofigType, lineCofigType } from '../types/index'
 export function drawText(rectCfg: rectCofigType, ctx: any, x: number, y: number, title?: string, active?: boolean): void {
-  ctx.fillStyle = "black";
+  ctx.fillStyle = rectCfg?.txtColor ?? 'black';
   ctx.font = rectCfg?.fontSize ? rectCfg?.fontSize + ' Arial' : '12px Arial'
-  active && (ctx.fillStyle = "white");
+  const align = rectCfg?.align ?? 'center'
+  let txtX, txtY;
   const txtWidth = ctx.measureText(title).width
-  ctx.fillText(title, x - (rectCfg?.xText ?? txtWidth / 2), y + (rectCfg?.yText ?? 5));
+  const padding = (rectCfg?.corner ?? 5) < 5 ? 5 : (rectCfg?.corner ?? 5)
+  if (align === 'center') {
+    txtX = x - (txtWidth / 2)
+    txtY = y + 5
+  } else if (align === 'left') {
+    txtX = x - (rectCfg?.width / 2) + padding
+    txtY = y + 5
+  } else if (align === 'right') {
+    txtX = x + (rectCfg?.width / 2 - txtWidth) - padding
+    txtY = y + 5
+  }
+  active && (ctx.fillStyle = rectCfg?.activeTxtColor ?? "white");
+  ctx.fillText(title, txtX, txtY);
 }
 
 export function drawRoundedRect(rectCfg: rectCofigType, ctx: any, x: number, y: number, corner: number, title?: string, active?: boolean, bgImg?: string): void {
@@ -89,7 +102,11 @@ export function drawLine(lineCfg: lineCofigType, rectCfg: rectCofigType, ctx: an
   const halfHeight = (rectCfg?.height / 2) || 15
   ctx.save()
   ctx.beginPath();
-  ctx.moveTo(sx, sy);
+  if (sy > y) {
+    ctx.moveTo(sx, sy - halfHeight);
+  } else {
+    ctx.moveTo(sx, sy + halfHeight);
+  }
   if ((sy > y && sy > y + halfHeight + 30) || (sy < y && sy < y - halfHeight - 30)) {
     ctx.lineTo(sx, (sy + (y - sy) / 2));
     ctx.lineTo(x, (sy + (y - sy) / 2));
@@ -97,7 +114,11 @@ export function drawLine(lineCfg: lineCofigType, rectCfg: rectCofigType, ctx: an
     ctx.lineTo(sx, sy + (sy > y ? 30 : -30));
     ctx.lineTo(x, sy + (sy > y ? 30 : -30));
   }
-  ctx.lineTo(x, y);
+  if (sy > y) {
+    ctx.lineTo(x, y + halfHeight);
+  } else {
+    ctx.lineTo(x, y - halfHeight);
+  }
   ctx.lineWidth = lineCfg?.width ?? 2;
   ctx.strokeStyle = lineCfg?.color ?? "#40a9ff";
   active && (ctx.strokeStyle = lineCfg?.activeColor ?? "orange")

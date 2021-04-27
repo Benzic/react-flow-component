@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-08-06 10:50:12
- * @LastEditTime: 2020-08-26 15:16:16
+ * @LastEditTime: 2021-01-25 10:43:26
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\components\flowCom\index.d.ts
@@ -44,6 +44,7 @@ export interface itemNodeType {
     key: string | number,                               //唯一值key
     to?: any[],                                         //节点连接的子节点key集合
     active?: boolean,                                   //是否激活状态  默认false
+    parent?: string,
     // bgImg?: string,                                  //单独设置节点的背景图片（性能问题比较明显）
     // url?: string                                     //节点点击后跳转的连接
 }

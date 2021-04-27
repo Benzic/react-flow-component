@@ -14,8 +14,9 @@ export interface rectCofigType {
     xCorrecting?: number;
     yCorrecting?: number;
     fontSize?: string;
-    xText?: number;
-    yText?: number;
+    txtColor?: string;
+    activeTxtColor?: string;
+    align?: string;
     edit?: boolean;
     autoY?: number;
     autoX?: number;
@@ -34,4 +35,5 @@ export interface itemNodeType {
     key: string | number;
     to?: any[];
     active?: boolean;
+    parent?: string;
 }

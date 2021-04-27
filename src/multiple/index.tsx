@@ -1,123 +1,101 @@
+/*
+ * @Author: your name
+ * @Date: 2021-03-17 10:59:36
+ * @LastEditTime: 2021-04-26 14:10:22
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \my-app\src\flow\mutiple.tsx
+ */
 import React, { useEffect, useCallback, useRef } from 'react'
-import { FlowProps } from '../types/index'
-import { dragSelect, drawLine } from '../drawCanvas'
-import action from '../actions'
-const MultipleFlow: React.FC<FlowProps> = ({ flowNodes = [], rectConfig, lineCofig, onChange, onDBClick }) => {
-  const canvas: any = useRef(null)
-  const wrapper: any = useRef(null)
-  useEffect(() => {
-    action.rectCfg = rectConfig
-    action.lineCfg = lineCofig
-    action.onChange = onChange
-  }, [rectConfig, lineCofig, onChange])
-  useEffect(() => {
-    window.addEventListener('keydown', action.checkKeyDown, true);
-    if (rectConfig?.edit) {
-      window.addEventListener('mouseup', () => {
-        if ((new Date()).getTime() - action.lastMouseUpTime < 250) {
-          action.singleClick = false
-          const rectIndex = action.getRectIndex(action.activeMoveRect)
-          const node = {
-            node: action.nodes[rectIndex],
-            index: rectIndex
-          }
-          onDBClick && onDBClick(node)
+import { Flow } from '../actions/index'
+const MultipleFlow: React.FC<any> = ({ flowNodes = [], rectConfig, lineCofig, onChange, onDBClick }) => {
+    const canvas: any = useRef(null)
+    const wrapper: any = useRef(null)
+    const flow: any = useRef(null)
+    const singleClick: any = useRef(false)
+    useEffect(() => {
+        flow.current = new Flow(flowNodes, canvas.current, true, rectConfig, lineCofig, onChange, onDBClick);
+    }, [rectConfig, lineCofig, flowNodes, onChange])
+    const onMouseMove = useCallback((event: any) => {
+        const ax = event.offsetX, ay = event.offsetY;
+        if (flow.current.activeMoveRect !== null) {
+            const rectIndex = flow.current.getRectIndex(flow.current.activeMoveRect)
+            if (singleClick.current) {
+                if (flow.current.nodes[rectIndex].active) {
+                    flow.current.nodes[rectIndex].x = Math.floor(ax / (rectConfig?.xCorrecting ?? 10)) * (rectConfig?.xCorrecting ?? 10)
+                    flow.current.nodes[rectIndex].y = Math.floor(ay / (rectConfig?.yCorrecting ?? 5)) * (rectConfig?.yCorrecting ?? 5)
+                }
+                flow.current.initCanvas()
+            } else {
+                flow.current.initCanvas()
+                flow.current.drawLine(flow.current.nodes[rectIndex].x, flow.current.nodes[rectIndex].y, ax, ay)
+            }
+        } else {
+            flow.current.activeDeleRect = null
+            flow.current.initCanvas()
+            flow.current.selectArea.startX = flow.current.mouseDownXY.x;
+            flow.current.selectArea.startY = flow.current.mouseDownXY.y;
+            flow.current.selectArea.endX = ax;
+            flow.current.selectArea.endY = ay;
+            flow.current.dragSelect(flow.current.mouseDownXY.x, flow.current.mouseDownXY.y, ax, ay)
         }
-        action.lastMouseUpTime = (new Date()).getTime()
-      }, true);
-    }
-    return () => {
-      window.removeEventListener('mouseup', null)
-      window.removeEventListener('keydown', null)
-    }
-  }, [rectConfig.edit])
-  useEffect(() => {
-    action.nodes = flowNodes
-    action.ctx && action.initCanvas()
-  }, [flowNodes])
-  const onMouseMove = useCallback((event: any) => {
-    const ax = event.offsetX, ay = event.offsetY;
-    if (action.activeMoveRect !== null) {
-      const rectIndex = action.getRectIndex(action.activeMoveRect)
-      if (action.singleClick) {
-        if (action.nodes[rectIndex].active) {
-          action.nodes[rectIndex].x = Math.floor(ax / (action.rectCfg?.xCorrecting ?? 10)) * (action.rectCfg?.xCorrecting ?? 10)
-          action.nodes[rectIndex].y = Math.floor(ay / (action.rectCfg?.yCorrecting ?? 5)) * (action.rectCfg?.yCorrecting ?? 5)
+    }, [])
+    const onDragRect = useCallback(() => {
+        canvas.current.onmousemove = onMouseMove
+        canvas.current.onmouseup = function (event: any) {
+            const ax = event.offsetX, ay = event.offsetY;
+            if (flow.current.activeMoveRect !== null && !singleClick.current) {
+                const activeMoveRectPoint = flow.current.findRectInCanvas(ax, ay)
+                const rectIndex = flow.current.getRectIndex(flow.current.activeMoveRect)
+                if (activeMoveRectPoint) {
+                    flow.current.nodes[rectIndex].toNodes = [...flow.current.nodes[rectIndex].toNodes, activeMoveRectPoint.key]
+                    flow.current.nodes[rectIndex].active = false
+                    onChange && onChange(flow.current.nodes)
+                }
+                flow.current.initCanvas()
+            } else {
+                if (flow.current.activeMoveRect === null) {
+                    flow.current.findLineInCanvas()
+                }
+            }
+            flow.current.activeMoveRect = null
+            canvas.current.onmousemove = null;
+            canvas.current.onmouseup = null;
+        };
+    }, [onMouseMove, onChange])
+    const onMouseDown = useCallback((event: any) => {
+        const x = event.offsetX, y = event.offsetY;
+        if (flow.current.lastClickTime) {
+            singleClick.current = (new Date()).valueOf() - (flow.current.lastClickTime).valueOf() < 250 ? false : true
         }
-        action.initCanvas()
-      } else {
-        action.initCanvas()
-        drawLine(action.lineCfg, action.rectCfg, action.ctx, action.nodes[rectIndex].x, action.nodes[rectIndex].y, ax, ay)
-      }
-    } else {
-      action.activeDeleRect = null
-      action.initCanvas()
-      action.selectArea.startX = action.mouseDownXY.x;
-      action.selectArea.startY = action.mouseDownXY.y;
-      action.selectArea.endX = ax;
-      action.selectArea.endY = ay;
-      dragSelect(action.ctx, action.mouseDownXY.x, action.mouseDownXY.y, ax, ay)
-    }
-  }, [])
-  const onDragRect = useCallback(() => {
-    canvas.current.onmousemove = onMouseMove
-    canvas.current.onmouseup = function (event: any) {
-      const ax = event.offsetX, ay = event.offsetY;
-      if (action.activeMoveRect !== null && !action.singleClick) {
-        const activeMoveRectPoint = action.findRectInCanvas(ax, ay)
-        const rectIndex = action.getRectIndex(action.activeMoveRect)
+        flow.current.lastClickTime = new Date()
+        flow.current.mouseDownXY.x = x;
+        flow.current.mouseDownXY.y = y;
+        const activeMoveRectPoint = flow.current.findRectInCanvas(x, y)
         if (activeMoveRectPoint) {
-          action.nodes[rectIndex].to = [...action.nodes[rectIndex].to, activeMoveRectPoint.key]
-          action.nodes[rectIndex].active = false
-          onChange && onChange(action.nodes)
+            flow.current.activeMoveRect = activeMoveRectPoint?.key
+            flow.current.activeDeleRect = activeMoveRectPoint?.key;
+            flow.current.editLine = null
+            flow.current.activeLines = []
+            const rectIndex = flow.current.getRectIndex(activeMoveRectPoint?.key)
+            const current = flow.current.nodes[rectIndex]
+            flow.current.nodes[rectIndex].active = true
+            flow.current.nodes.splice(rectIndex, 1)
+            flow.current.nodes.push(current)
+            onChange && onChange(flow.current.nodes)
+            flow.current.initCanvas()
         }
-        action.initCanvas()
-      } else {
-        if (action.activeMoveRect === null) {
-          action.findLineInCanvas()
+        onDragRect();
+    }, [onDragRect, onChange])
+    useEffect(() => {
+        if (wrapper.current) {
+            canvas.current.width = wrapper.current.offsetWidth;
+            canvas.current.height = wrapper.current.offsetHeight
+            canvas.current.onmousedown = onMouseDown
         }
-      }
-      action.activeMoveRect = null
-      canvas.current.onmousemove = null;
-      canvas.current.onmouseup = null;
-    };
-  }, [onMouseMove, onChange])
-  const onMouseDown = useCallback((event: any) => {
-    const x = event.offsetX, y = event.offsetY;
-    if (action.lastClickTime) {
-      action.singleClick = (new Date()).valueOf() - (action.lastClickTime).valueOf() < 250 ? false : true
-    }
-    action.lastClickTime = new Date()
-    action.mouseDownXY.x = x;
-    action.mouseDownXY.y = y;
-    const activeMoveRectPoint = action.findRectInCanvas(x, y)
-    if (activeMoveRectPoint) {
-      action.activeMoveRect = activeMoveRectPoint?.key
-      action.activeDeleRect = activeMoveRectPoint?.key
-      const rectIndex = action.getRectIndex(activeMoveRectPoint?.key)
-      const current = action.nodes[rectIndex]
-      action.nodes[rectIndex].active = true
-      action.nodes.splice(rectIndex, 1)
-      action.nodes.push(current)
-      onChange && onChange(action.nodes)
-      action.initCanvas()
-    }
-    onDragRect();
-  }, [onDragRect, onChange])
-  useEffect(() => {
-    if (wrapper.current && !action.canvas) {
-      action.canvas = canvas.current
-      canvas.current.width = wrapper.current.offsetWidth;
-      canvas.current.height = wrapper.current.offsetHeight
-      action.canvas.width = wrapper.current.offsetWidth;
-      action.canvas.height = wrapper.current.offsetHeight
-      action.ctx = canvas.current.getContext("2d");
-      canvas.current.onmousedown = onMouseDown
-      action.initCanvas()
-    }
-  }, [onMouseDown])
-  return <div ref={wrapper} style={{ width: "100%", height: "100%" }}>
-    <canvas ref={canvas} id="canvas"></canvas>
-  </div>
+    }, [onMouseDown])
+    return <div ref={wrapper} style={{ width: "100%", height: "100%" }}>
+        <canvas ref={canvas} id="canvas"></canvas>
+    </div>
 }
 export default MultipleFlow

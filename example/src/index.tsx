@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { render } from 'react-dom';
-import { MultipleFlow, SingleFlow } from '../../src/index';
+import { MultipleFlow } from '../../src/index';
 import './index.less'
 const treeData = [
   {
@@ -74,8 +74,48 @@ const treeData = [
     ],
   },
 ];
-const App: React.SFC = () => {
-  const [selectedKeys, setSelectedKeys] = useState([]);
+const App: React.FC = () => {
+  const [selectedKeys, setSelectedKeys] = useState<any>([
+    {
+      active: false,
+      key: "0-3",
+      title: "过程品质分析",
+      floor: 0,
+      toNodes: ["0-4", "0-5"],
+      total: 250,
+      x: 294,
+      y: 112,
+    }, {
+      active: false,
+      key: "0-4",
+      floor: 1,
+      title: "工艺履历分析",
+      parent: "0-3",
+      toNodes: [],
+      x: 231.5,
+      y: 212,
+    },
+    {
+      active: false,
+      key: "0-5",
+      title: "工艺参数分析",
+      parent: "0-3",
+      floor: 1,
+      toNodes: ["0-6"],
+      total: 125,
+      x: 356.5,
+      y: 112,
+    }, {
+      active: false,
+      key: "0-6",
+      parent: "0-5",
+      title: "工艺路径分析",
+      toNodes: [],
+      floor: 2,
+      total: 0,
+      x: 356.5,
+      y: 312,
+    },]);
   const [zIndex, setZindex] = useState(0)
   const [currentKey, setCurrentKey] = useState(null)
   const [showKeys, setShowKeys] = useState([])
@@ -109,7 +149,7 @@ const App: React.SFC = () => {
         x: evt.clientX - offset_x + 50 - 200,
         y: evt.clientY - offset_y + 15,
         active: false,
-        to: []
+        toNodes: []
       }]);
     }
   }
@@ -135,26 +175,26 @@ const App: React.SFC = () => {
         })
       }
     </div>
-    {/* <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: 10, background: "#ddd" }}>
+    <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: 10, background: "#ddd" }}>
       <MultipleFlow onDBClick={(val) => {
         console.log(val)
       }} rectConfig={{
         activeBgColor: "rgba(0,0,0,0.5)",
         bgColor: "rgba(255,0,0,0.5)",
         edit: true
-      }} flowNodes={selectedKeys} onChange={(val)=>{
+      }} flowNodes={selectedKeys} onChange={(val) => {
         console.log(val)
       }}></MultipleFlow>
-    </div> */}
-    <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: 10, background: "#ddd" }}>
+    </div>
+    {/* <div style={{ marginLeft: "200px", width: "calc(100% - 200px)", height: "100%", position: "relative", zIndex: 10, background: "#ddd" }}>
       <SingleFlow rectConfig={{
         activeBgColor: "rgba(0,0,0,0.5)",
         bgColor: "rgba(255,0,0,0.5)",
-        width: 300,
-        height: 50,
-        autoY: 100
+        // width: 300,
+        // height: 50,
+        // autoY: 100
       }} flowNodes={selectedKeys}></SingleFlow>
-    </div>
+    </div> */}
   </div>;
 };
 render(<App />, document.querySelector('#app'));

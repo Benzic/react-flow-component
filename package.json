@@ -1,6 +1,6 @@
 {
   "name": "react-flow-component",
-  "version": "0.2.10",
+  "version": "0.3.16",
   "description": "a work-flow component for react",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,14 +22,11 @@
   ],
   "author": "benzic",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "@types/react": "^16.9.35",
     "@types/react-dom": "^16.9.8",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-hook-form": "^5.7.2"
-  },
-  "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^3.0.0",
     "@typescript-eslint/parser": "^3.0.0",
     "clean-webpack-plugin": "^3.0.0",
@@ -40,6 +37,7 @@
     "html-webpack-plugin": "^4.3.0",
     "less": "^3.11.1",
     "less-loader": "^6.1.0",
+    "resize-observer-polyfill": "^1.5.1",
     "source-map-loader": "^0.2.4",
     "style-loader": "^1.2.1",
     "ts-loader": "^7.0.4",

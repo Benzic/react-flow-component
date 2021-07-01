@@ -1,50 +1,159 @@
 /*
  * @Author: your name
- * @Date: 2020-08-06 10:50:12
- * @LastEditTime: 2021-01-25 10:43:26
+ * @Date: 2021-06-18 15:19:37
+ * @LastEditTime: 2021-06-24 16:29:54
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
- * @FilePath: \my-app\src\components\flowCom\index.d.ts
+ * @FilePath: \BigDataAP\src\views\caseAnalysis\flow\interface.ts
  */
-export interface FlowProps {
-    flowNodes?: itemNodeType[],                         //展示的flow节点
-    rectConfig?: rectCofigType,                         //flow节点配置项
-    lineCofig?: lineCofigType,                          //flow连接线条配置
-    onDBClick?: (val: any) => void                      //双击单个节点编辑事件
-    onChange?: (val: itemNodeType[]) => void            //节点的位置、删除、线条删除等事件变化后的响应事件
+export interface nodeType {
+    key: string | number; //唯一key值
+    toNodes: any[]; //子节点key数组
+    x: number; //x坐标
+    y: number; //y坐标
+    active?: boolean; //激活状态
+    level?: string | number; //层级 用于判断连接关系 高level可以链接低level节点
+    bgImg?: CanvasImageSource; //背景图片
+    corner?: number; //圆角
+    name?: string; //显示文本
+    tool?: toolType; //显示按钮
 }
-export interface rectCofigType {
-    activeBgColor?: string,                             //节点激活的背景颜色    默认#40a9ff
-    bgColor?: string,                                   //未激活背景颜色    默认白色
-    corner?: number                                     //圆角(如果是正方形，圆角>长宽一半则绘制为圆形) 默认0
-    width?: number,                                     //节点的宽度    默认100px
-    height?: number,                                    //节点的高度    默认30px
-    xCorrecting?: number,                               //节点移动X方向的自动校正距离   默认10px
-    yCorrecting?: number,                               //节点移动Y方向的自动校正距离   默认5px
-    fontSize?: string,                                  //节点的字体大小    默认12px
-    txtColor?: string,                                  //节点的字体颜色    默认黑色
-    activeTxtColor?: string,                            //节点的高亮字体颜色    默认白色
-    align?: string,                                     //节点字体水平位置  默认居中
-    // bgImg?: string,                                  //节点的背景图片（性能问题比较明显）
-    edit?: boolean                                      //是否支持编辑  默认false
-    autoY?: number                                      //singleFlow 子节点挂载到父节点后Y方向偏移得位置    默认100
-    autoX?: number                                      //singleFlow 子节点挂载到父节点后X方向偏移得位置    默认0
+
+export interface toolType {
+    x?: number; //x坐标
+    y?: number; //y坐标
+    width?: number; //宽度
+    height?: number; //高度
+    title?: string; //显示文本
+    active?: boolean; //激活状态
+    bgImg?: CanvasImageSource; //背景图片
+    activeBgColor?: string; //高亮背景色
+    bgColor?: string; //背景颜色
+    corner?: number; //圆角
+    shadowBlur?: number;//阴影范围
+    shadowColor?: string;//阴影颜色
 }
-export interface lineCofigType {
-    activeColor?: string,                               //连线高亮颜色  默认#40a9ff
-    color?: string,                                     //连线未激活颜色    默认白色
-    width?: number                                      //线条宽度  默认2px
+
+export interface labelType {
+    width?: number; //宽度
+    height?: number; //高度
+    title?: string; //文本
+    bgColor?: string; //背景颜色
+    corner?: number; //圆角
+    active?: boolean; //激活状态
+    bgImg?: CanvasImageSource; //背景图片
+    shadowBlur?: number;//阴影范围
+    shadowColor?: string;//阴影颜色
+    textMargin?: number[];//文本位置偏移
+    textAlign?: "center" | "left" | "right"
 }
-export interface itemNodeType {
-    x: number,                                          //节点初始X坐标 
-    y: number,                                          //节点初始Y坐标
-    height?: number,                                    //单独设置节点高度  默认100px
-    width?: number,                                     //单独设置节点宽度  默认30px
-    title?: string,                                     //节点显示文本  
-    key: string | number,                               //唯一值key
-    to?: any[],                                         //节点连接的子节点key集合
-    active?: boolean,                                   //是否激活状态  默认false
-    parent?: string,
-    // bgImg?: string,                                  //单独设置节点的背景图片（性能问题比较明显）
-    // url?: string                                     //节点点击后跳转的连接
+export interface lineCfg {
+    levelLimit?: boolean; //是否开启层级限制 默认关闭
+    width?: number; //线宽
+    label?: labelType; //label
+}
+export interface rectCfg {
+    width?: number; //宽度
+    height?: number; //高度
+    xCorrecting?: number; //x方向位置校正
+    yCorrecting?: number; //y方向位置校正
+    textMargin?: number[];//文本位置偏移
+    textAlign?: "center" | "left" | "right"
+    corner?: number; //圆角
+    bgImg?: CanvasImageSource; //背景图片
+    activeBgColor?: string; //激活背景颜色
+    bgColor?: string; //背景颜色
+    shadowBlur?: number;//阴影范围
+    shadowColor?: string;//阴影颜色
+    tool?: toolType; //按钮
+}
+export interface selectAreaType {
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+}
+export interface lineType {
+    x: number;
+    y: number;
+    fromNodes: any;
+    toNodes: any;
+}
+export interface rectType {
+    point: any;
+    key: number | string;
+}
+export interface dbClickType {
+    type: "line" | "node" | "tool";
+    node: rectType | lineType;
+}
+export interface grdCfg {
+    color?: string;
+    type?: "point" | "line";//point是点格 line是线
+    stepX?: number;//传入X方向距离
+    stepY?: number;//传入Y方向距离
+    width?: number;
+    space?: number;//网格绘制多余的范围
+}
+export interface propsType {
+    flowNodes: nodeType[];
+    canvas: HTMLCanvasElement;
+    wrapper: HTMLDivElement;
+    rectConfig?: rectCfg;
+    lineConfig?: lineCfg;
+    gradConfig?: grdCfg;
+    onChange?: (val: any) => void;
+    onDBClick?: (val: dbClickType) => void;
+    onChangePosition?: (val: { translateX: number; translateY: number }) => void;
+}
+export interface drawTextType {
+    x: number;
+    y: number;
+    hWidth: number;
+    title?: string | number;
+    txtColor?: string;
+    aTextColor?: string;
+    fontSize?: string;
+    align?: string;
+    margin?: number[];
+    active?: boolean;
+    r?: number;
+}
+
+export interface drawLineType {
+    sx: number; //开始x坐标
+    sy: number; //开始y坐标
+    x: number; //结束x坐标
+    y: number; //结束y坐标
+    active?: boolean; //激活状态
+    _h?: number; //节点高度
+    _w?: number; //线宽度
+    color?: string; //线颜色
+    aColor?: string; //线激活颜色
+    label?: labelType; //label
+}
+export interface drawTriangleType {
+    sy: number; //开始y坐标
+    x: number; //结束x坐标
+    y: number; //结束y坐标
+    _w?: number; //线宽
+    _h?: number; //节点高度
+    _xDev?: number; //箭头宽度
+    color?: string; //箭头颜色
+    aColor?: string; //箭头激活颜色
+    active?: boolean; //激活状态
+}
+
+export interface drawRoundedType {
+    x: number;
+    y: number;
+    r: number;
+    active?: boolean;
+    bgImg?: CanvasImageSource;
+    hWidth: number;
+    hHeight: number;
+    bgColor?: string;
+    aBgColor?: string;
+    shadowBlur?: number;
+    shadowColor?: string
 }

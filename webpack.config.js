@@ -1,8 +1,8 @@
 /*
  * @Author: your name
  * @Date: 2020-08-21 17:39:24
- * @LastEditTime: 2020-08-24 14:06:37
- * @LastEditors: your name
+ * @LastEditTime: 2021-07-20 11:20:09
+ * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \react-flow-component\webpack.config.js
  */
@@ -36,7 +36,7 @@ const base = {
           { loader: 'less-loader', },
         ]
       },
-
+      {test:/\.(jpg|png|jpeg|gif)$/,loader:"url-loader"}
     ],
   },
   optimization: {

@@ -1,10 +1,12 @@
 import React from "react";
 import "./index.less";
-import { nodeType, lineCfg, rectCfg, grdCfg, dbClickType } from "./../types/index";
+import { nodeType, lineCfg, rectCfg, grdCfg, dbClickType, lineType } from "./../types/index";
 declare const MultipleFlow: React.FC<{
     flowNodes: nodeType[];
+    flowLines?: lineType[];
     rectConfig?: rectCfg;
     lineConfig?: lineCfg;
+    cref?: any;
     gradConfig?: grdCfg;
     onChange?: (val: any) => void;
     onDBClick?: (val: dbClickType) => void;

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { render } from 'react-dom';
 import { MultipleFlow } from '../../src/index';
 import './index.less'
@@ -75,44 +75,11 @@ const treeData = [
   },
 ];
 const App: React.FC = () => {
-  const [selectedKeys, setSelectedKeys] = useState<any>([
-    {
-      active: false,
-      key: "0-3",
-      name: "测试4",
-      toNodes: ["0-4", "0-5"],
-      x: 294,
-      level: 2,
-      y: 112,
-    }, {
-      active: false,
-      key: "0-4",
-      name: "测试3",
-      toNodes: [],
-      level: 3,
-      x: 231.5,
-      y: 212,
-    },
-    {
-      active: false,
-      key: "0-5",
-      name: "测试2",
-      toNodes: ["0-6"],
-      level: 1,
-      x: 356.5,
-      y: 112,
-    }, {
-      active: false,
-      key: "0-6",
-      name: "测试1",
-      toNodes: [],
-      level: 4,
-      x: 356.5,
-      y: 312,
-    },]);
+  const [selectedKeys, setSelectedKeys] = useState<any>([]);
   const [zIndex, setZindex] = useState(0)
   const [currentKey, setCurrentKey] = useState(null)
   const [showKeys, setShowKeys] = useState([])
+  const [lineList, setLineList] = useState([])
   const dragBox = useRef(null)
   window.ondragstart = function (event) {
     setZindex(100)
@@ -179,8 +146,19 @@ const App: React.FC = () => {
         shadowBlur: 20,
         shadowColor: "rgba(0,0,0,0.2)",
         textMargin: [5, 0, 0, 0]
-      }} gradConfig={{ type: "point",color:"#999"}} flowNodes={selectedKeys} onChange={(val) => {
+      }} lineConfig={{
+        move: true,
+        label: {
+          title: "编辑",
+          width: 16,
+          height: 8,
+          bgColor: "orange",
+          txtColor: "white",
+          fontSize: "9px"
+        },
+      }} flowLines={lineList} gradConfig={{ type: "point", color: "#999" }} flowNodes={selectedKeys} onChange={(val) => {
         console.log(val)
+        setLineList(val.lines)
       }}></MultipleFlow>
     </div>
   </div>;

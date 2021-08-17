@@ -1,6 +1,7 @@
 export interface nodeType {
     key: string | number;
     toNodes: any[];
+    fromNodes: any[];
     x: number;
     y: number;
     active?: boolean;
@@ -36,9 +37,13 @@ export interface labelType {
     shadowColor?: string;
     textMargin?: number[];
     textAlign?: "center" | "left" | "right";
+    txtColor?: string;
+    aTextColor?: string;
+    fontSize?: string;
 }
 export interface lineCfg {
     levelLimit?: boolean;
+    move?: boolean;
     width?: number;
     label?: labelType;
 }
@@ -64,10 +69,16 @@ export interface selectAreaType {
     endY: number;
 }
 export interface lineType {
-    x: number;
-    y: number;
-    fromNodes: any;
-    toNodes: any;
+    [propName: string]: any;
+    x?: number;
+    y?: number;
+    fromNode: any;
+    toNode: any;
+    data?: {};
+    turnPoints?: {
+        x: number;
+        y: number;
+    }[];
 }
 export interface rectType {
     point: any;
@@ -89,6 +100,7 @@ export interface propsType {
     flowNodes: nodeType[];
     canvas: HTMLCanvasElement;
     wrapper: HTMLDivElement;
+    flowLines?: lineType[];
     rectConfig?: rectCfg;
     lineConfig?: lineCfg;
     gradConfig?: grdCfg;

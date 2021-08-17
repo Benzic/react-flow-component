@@ -1,11 +1,12 @@
 /*
  * @Author: benzic
  * @Date: 2021-03-17 10:59:10
- * @LastEditTime: 2021-07-01 17:22:29
+ * @LastEditTime: 2021-08-16 14:15:47
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\flow\base.ts
  */
+
 import {
   nodeType,
   lineCfg,
@@ -20,12 +21,15 @@ import {
   drawTriangleType,
   drawRoundedType,
   toolType,
-  grdCfg
+  grdCfg,
 } from "./../types/index";
+import transfer from "../assets/transfer.png";
+const img = new Image();
+img.src = transfer;
 export class Flow {
   private ctx: CanvasRenderingContext2D | null;
   private nodes: nodeType[];
-  private lines: any[]
+  private lines: lineType[];
   private canvas: HTMLCanvasElement;
   private wrapper: HTMLDivElement;
   private lineCfg: lineCfg;
@@ -38,6 +42,7 @@ export class Flow {
     endY: 0,
   };
   private activeLines: lineType[] = [];
+  private moveLine: lineType | null = null;
   private activeKey: number | null = null;
   private lastMouseUpTime: number = 0;
   private editLine: lineType | null = null;
@@ -53,7 +58,7 @@ export class Flow {
   private leftMouseDown: boolean = false; //暂存左键是否点击的变量
   private drawElement: HTMLElement | null = null; //画线的按钮
   private drawLineModel: boolean = false; //画线模式
-  private lineFormNodeKey: any = null; //画线模式下的开始节点
+  private lineFromNodeKey: any = null; //画线模式下的开始节点
   private onChange?: (val: any) => void;
   private onDBClick?: (val: dbClickType) => void;
   private onChangePosition?: (val: {
@@ -62,6 +67,7 @@ export class Flow {
   }) => void;
   constructor({
     flowNodes,
+    flowLines,
     canvas,
     wrapper,
     rectConfig,
@@ -75,10 +81,10 @@ export class Flow {
     this.nodes = flowNodes;
     this.canvas = canvas;
     this.wrapper = wrapper;
-    this.lines = []
+    this.lines = flowLines ?? [];
     this.lineCfg = lineConfig ?? {};
     this.rectCfg = rectConfig ?? {};
-    this.gradConfig = gradConfig;
+    this.gradConfig = gradConfig ?? {};
     this.onDBClick = onDBClick;
     this.onChange = onChange;
     this.onChangePosition = onChangePosition;
@@ -94,7 +100,7 @@ export class Flow {
     this.lastMouseUpTime = 0;
     this.activeKey = null;
     this.activeLines = [];
-    this.lineFormNodeKey = null;
+    this.lineFromNodeKey = null;
     this.selectArea = {
       startX: 0,
       startY: 0,
@@ -110,6 +116,7 @@ export class Flow {
     this.onListenKeyUp();
     this.onListenOnMouseDown();
     this.onListenDBClick();
+    this.onListenMouseMove();
   }
   throttle = (
     fn: { apply: (arg0: any, arg1: any[]) => void },
@@ -155,8 +162,8 @@ export class Flow {
   };
   onConectLine = (offsetX: number, offsetY: number) => {
     //纯画线模式
-    const _index: number = this.getRectIndex(this.lineFormNodeKey) || 0;
-    const { height: rectHeight } = this.rectCfg;
+    const _index: number = this.getRectIndex(this.lineFromNodeKey) || 0;
+    const { height: rectHeight = 0 } = this.rectCfg;
     const { width: lineWidth } = this.lineCfg;
     this.render();
     this.drawLine({
@@ -168,94 +175,166 @@ export class Flow {
       _h: rectHeight / 2,
     });
   };
-  onListenMouseMove = (event: MouseEvent) => {
-    let { clientX: oldX, clientY: oldY } = event;
+  onMoveNode = (offsetX: number, offsetY: number, _index: number) => {
+    const { xCorrecting = 10, yCorrecting = 5 } = this.rectCfg;
+    const { lines } = this;
+    //单击拖动节点位移
+    if (this.nodes[_index].active) {
+      const _X = (offsetX - this.translateX) / xCorrecting;
+      const _Y = (offsetY - this.translateY) / yCorrecting;
+      const _xDev = Math.floor(_X) * xCorrecting; //X方向位置位移
+      const _yDev = Math.floor(_Y) * yCorrecting; //Y方向位置位移
+      this.nodes[_index].x = _xDev; //校正X位移
+      this.nodes[_index].y = _yDev; //校正Y位移
+      for (let i = 0; i <= lines?.length - 1; i++) {
+        const { turnPoints } = lines[i];
+        let _turnPoints = this.cloneObject(turnPoints);
+        if (lines[i].fromNode === this.nodes[_index].key) {
+          _turnPoints[0].x = _xDev; //线条调整第一个点
+        }
+        if (lines[i].toNode === this.nodes[_index].key) {
+          _turnPoints[1].x = _xDev; //线条调整第二个点
+        }
+        lines[i] = {
+          ...lines[i],
+          turnPoints: _turnPoints,
+        };
+      }
+      this.lines = lines;
+    }
+    this.render();
+  };
+  //连线
+  onConnectLine = (offsetX: number, offsetY: number, _index: number) => {
+    const { height: _h = 0 } = this.rectCfg;
+    const { width: _lineW } = this.lineCfg;
+    const { translateX, translateY } = this;
+    this.render();
+    this.drawLine({
+      sx: this.nodes[_index].x + translateX,
+      sy: this.nodes[_index].y + translateY,
+      x: offsetX,
+      y: offsetY,
+      _w: _lineW,
+      _h: _h / 2,
+    });
+  };
+  cloneObject = (val: any) => {
+    return JSON.parse(JSON.stringify(val));
+  };
+  onListenMouseMove = (event?: MouseEvent) => {
+    let oldX = event?.clientX ?? 0,
+      oldY = event?.clientY ?? 0;
     this.canvas.onmousemove = (event: MouseEvent) => {
       const { clientX: newX, clientY: newY, ctrlKey, offsetX, offsetY } = event;
       if (this.drawLineModel) {
         this.onConectLine(offsetX, offsetY);
       } else {
-        const { leftMouseDown, activeKey, rectCfg, lineCfg } = this;
-        if (ctrlKey && leftMouseDown) {
-          //按住ctrl 以及鼠标左键 画布位移
-          const dX = newX - oldX;
-          const dY = newY - oldY;
-          oldX = newX;
-          oldY = newY;
-          this.translateX += dX;
-          this.translateY += dY;
-          this.onChangePosition?.({
-            translateX: this.translateX,
-            translateY: this.translateY,
-          });
-          this.render();
-        }
-        if (!ctrlKey) {
-          const { xCorrecting = 10, yCorrecting = 5, height: _h } = rectCfg;
-          const { width: _lineW } = lineCfg;
-          const { width: _W, height: _H } = this.canvas
-          if (activeKey !== null) {
-            const _index = this.getRectIndex(activeKey) ?? 0;
-            if (this.singleClick) {
-              //单击拖动节点位移
-              this.render();
-              if (this.nodes[_index].active) {
-                const _X = (offsetX - this.translateX) / xCorrecting;
-                const _Y = (offsetY - this.translateY) / yCorrecting;
-                this.nodes[_index].x = Math.floor(_X) * xCorrecting; //校正X位移
-                this.nodes[_index].y = Math.floor(_Y) * yCorrecting; //校正Y位移
+        const { leftMouseDown, activeKey, lineCfg, lines, moveLine } = this;
+        if (leftMouseDown) {
+          if (ctrlKey) {
+            //按住ctrl 以及鼠标左键 画布位移
+            const dX = newX - oldX;
+            const dY = newY - oldY;
+            oldX = newX;
+            oldY = newY;
+            this.translateX += dX;
+            this.translateY += dY;
+            this.onChangePosition?.({
+              translateX: this.translateX,
+              translateY: this.translateY,
+            });
+            this.render();
+          }
+          if (!ctrlKey) {
+            if (activeKey !== null) {
+              const _index = this.getRectIndex(activeKey) ?? 0;
+              if (this.singleClick) {
+                this.onMoveNode(offsetX, offsetY, _index);
+              } else {
+                this.onConnectLine(offsetX, offsetY, _index);
               }
             } else {
-              //双击长安拖动节点连线
-              this.render();
-              this.drawLine({
-                sx: this.nodes[_index].x + this.translateX,
-                sy: this.nodes[_index].y + this.translateY,
-                x: offsetX,
-                y: offsetY,
-                _w: _lineW,
-                _h: _h / 2,
-              });
+              const { move } = lineCfg;
+              if (moveLine && move) {
+                //移动线条
+                for (let i = 0; i <= lines.length - 1; i++) {
+                  const { turnPoints, fromNode, toNode } = lines[i];
+                  const { fromNode: _fromNode, toNode: _toNode } = moveLine;
+                  if (turnPoints?.length) {
+                    if (fromNode === _fromNode && toNode === _toNode) {
+                      let _turnPoints = this.cloneObject(turnPoints);
+                      _turnPoints[0].y = offsetY - this.translateY;
+                      _turnPoints[1].y = offsetY - this.translateY;
+                      lines[i] = { ...lines[i], turnPoints: _turnPoints };
+                      break;
+                    }
+                  }
+                }
+                this.lines = lines;
+                this.render();
+              } else {
+                //框选
+                this.selectArea.startX = this.mouseDownXY.x - this.translateX;
+                this.selectArea.startY = this.mouseDownXY.y - this.translateY;
+                this.selectArea.endX = offsetX - this.translateX;
+                this.selectArea.endY = offsetY - this.translateY;
+                this.render();
+                this.dragSelect(
+                  this.mouseDownXY.x,
+                  this.mouseDownXY.y,
+                  offsetX,
+                  offsetY
+                );
+              }
             }
-          } else {
-            //框选
-            this.selectArea.startX = this.mouseDownXY.x - this.translateX;
-            this.selectArea.startY = this.mouseDownXY.y - this.translateY;
-            this.selectArea.endX = offsetX - this.translateX;
-            this.selectArea.endY = offsetY - this.translateY;
-            this.render();
-            this.dragSelect(
-              this.mouseDownXY.x,
-              this.mouseDownXY.y,
-              offsetX,
-              offsetY
-            );
           }
+        } else {
+          const { move } = lineCfg;
+          move && this.findLinesInCanvas(offsetX, offsetY);
         }
       }
     };
   };
 
-  onConectNode = (index: number, node: any) => {
+  onConectNode = (Findex: number, Eindex: number) => {
     const { levelLimit } = this.lineCfg;
-    if (levelLimit && node.point?.level < this.nodes[index]?.level) {
+    let _FNode = this.nodes?.[Findex];
+    let _ENode = this.nodes?.[Eindex];
+    const _FLevel = _FNode?.level ?? 0;
+    const _ELevel = _ENode?.level ?? 0;
+    if (levelLimit && _ELevel < _FLevel) {
       return;
     }
-    console.log(node);
-    const _Y = (this.nodes[index].y - node.point?.y) / 2;
-    this.lines = [...this.lines, {
-      formNode: this.nodes[index].key,
-      toNode: node.key,
-      data: {},
-      transition: [{ x: this.nodes[index].x, y: this.nodes[index].y - _Y }, { x: node.point?.x, y: node.point?.y + _Y }]
-    }]
-    console.log(this.lines);
-    this.nodes[index] = {
-      ...this.nodes[index],
-      toNodes: [...this.nodes[index].toNodes, node.key],
-      active: false,
-    };
-    this.onChange?.(this.nodes);
+    if (
+      this.lines.find((item: any) => {
+        //如果已经有连线节点则跳出
+        return item.toNode === _ENode.key && item.fromNode === _FNode.key;
+      })
+    ) {
+      return;
+    }
+    const _Y = (_FNode.y - _ENode?.y) / 2;
+    this.lines = [
+      ...this.lines,
+      {
+        fromNode: _FNode.key,
+        toNode: _ENode.key,
+        data: {},
+        turnPoints: [
+          { x: _FNode.x, y: _FNode.y - _Y },
+          { x: _ENode?.x, y: _ENode?.y + _Y },
+        ],
+      },
+    ];
+    _FNode.toNodes = [..._FNode.toNodes, _ENode?.key];
+    _ENode.fromNodes = [..._ENode?.fromNodes, _FNode.key];
+    this.nodes[Findex] = _FNode;
+    this.nodes[Eindex] = _ENode;
+    this.onChange?.({
+      lines: this.lines,
+      nodes: this.nodes,
+    });
   };
   onListenMouseUp = () => {
     window.onmouseup = (event: MouseEvent) => {
@@ -266,7 +345,13 @@ export class Flow {
       if (!this.drawLineModel) {
         //非纯画线模式
         const { offsetX, offsetY } = event;
-        const { activeKey, lastMouseUpTime, mouseDownXY } = this;
+        const {
+          activeKey,
+          lastMouseUpTime,
+          mouseDownXY,
+          translateX,
+          translateY,
+        } = this;
         const { x: _x, y: _y } = mouseDownXY;
         if (Math.abs(_x - offsetX) > 10 || Math.abs(_y - offsetY) > 10) {
           this.cancelDBClick = true; //当双击偏移位置较大取消掉双击事件
@@ -274,13 +359,13 @@ export class Flow {
           this.cancelDBClick = false;
         }
         if (activeKey !== null) {
-          const _node = this.findRectInCanvas(
-            offsetX - this.translateX,
-            offsetY - this.translateY
+          const _Enode = this.findRectInCanvas(
+            offsetX - translateX,
+            offsetY - translateY
           ); //找到鼠标抬起是否有置于某个节点上方
-          const _index = this.getRectIndex(activeKey) ?? 0;
-          if (_node && _node?.key !== activeKey) {
-            this.onConectNode(_index, _node);
+          const _Findex = this.getRectIndex(activeKey) ?? 0;
+          if (_Enode && _Enode?.key !== activeKey) {
+            this.onConectNode(_Findex, _Enode?.index);
           }
           this.render();
         } else {
@@ -291,7 +376,6 @@ export class Flow {
           }
           this.render();
         }
-        this.canvas.onmousemove = null;
       }
     };
   };
@@ -333,6 +417,7 @@ export class Flow {
       }
     };
   }
+  //鼠标点击事件
   onListenOnMouseDown = () => {
     this.canvas.onmousedown = (event: MouseEvent) => {
       this.activeKey = null;
@@ -343,26 +428,24 @@ export class Flow {
         const _node = this.findRectInCanvas(
           offsetX - this.translateX,
           offsetY - this.translateY
-        );
+        ); //选中的节点
         if (_node) {
-          if (!this.lineFormNodeKey) {
-            this.lineFormNodeKey = _node?.key;
+          if (!this.lineFromNodeKey) {
+            //如果不存在上级节点则当前节点置为开始节点
+            this.lineFromNodeKey = _node?.key;
             this.onListenMouseMove(event);
           } else {
-            const _fromNodes = this.lineFormNodeKey;
-            const _index = this.getRectIndex(_fromNodes);
-            const _toNodes = this.nodes[_index].toNodes;
-            if (!_toNodes.includes(_node?.key) && _fromNodes !== _node?.key) {
-              this.onConectNode(_index, _node);
-            }
-            this.lineFormNodeKey = null;
+            const _FNode = this.lineFromNodeKey;
+            const _FIndex = this.getRectIndex(_FNode); //开始节点的角标
+            this.onConectNode(_FIndex, _node?.index); //连接节点
+            this.lineFromNodeKey = null;
             this.activeKey = null;
             this.canvas.onmousemove = null;
             this.render();
           }
         } else {
           this.canvas.onmousemove = null;
-          this.lineFormNodeKey = null;
+          this.lineFromNodeKey = null;
           this.render();
         }
       } else {
@@ -390,7 +473,6 @@ export class Flow {
               //更改节点顺序，canvas会绘制到最顶层
               this.nodes.splice(_index, 1);
               this.nodes.push({ ...current, active: true });
-              this.onChange?.(this.nodes);
               this.render();
             }
           }
@@ -401,6 +483,7 @@ export class Flow {
       }
     };
   };
+  //创建还原按钮
   createResetBtn() {
     const eli: HTMLDivElement = window.document.createElement("div");
     eli.innerHTML = "<div>还原</div>";
@@ -410,6 +493,7 @@ export class Flow {
     };
     this.wrapper.appendChild(eli);
   }
+  //创建画线按钮
   createLineBtn() {
     const eli: HTMLDivElement = window.document.createElement("div");
     eli.innerHTML = "<div>画线</div>";
@@ -420,6 +504,7 @@ export class Flow {
     this.drawElement = eli;
     this.wrapper.appendChild(eli);
   }
+  //切换模式
   onDrawLine() {
     if (this.drawElement) {
       if (!this.drawLineModel) {
@@ -431,26 +516,30 @@ export class Flow {
       }
     }
   }
+  //重置画布大小
   resize(wrapper: DOMRectReadOnly) {
     this.canvas.width = wrapper.width;
     this.canvas.height = wrapper.height;
     this.render();
   }
+  //还原画布位置
   resetPosition() {
     this.translateX = 0;
     this.translateY = 0;
     this.render();
   }
+  //渲染画布
   render = () => {
     if (this.ctx) {
       this.ctx.clearRect(0, 0, this.canvas?.width, this.canvas?.height);
       this.ctx.save();
       this.ctx.translate(this.translateX, this.translateY);
-      this.gradConfig && this.drawDrid()
+      this.gradConfig && this.drawDrid();
       this.initCanvas();
       this.ctx.restore();
     }
   };
+  //获取Node的Index角标
   getRectIndex(key: any): number {
     let index: number = 0;
     const { nodes } = this;
@@ -465,9 +554,9 @@ export class Flow {
   drawNodeInCanvas = (index: number) => {
     const { nodes, rectCfg, activeKey } = this;
     const {
-      width,
-      height,
-      corner,
+      width = 0,
+      height = 0,
+      corner = 0,
       bgImg,
       activeBgColor,
       bgColor,
@@ -475,7 +564,7 @@ export class Flow {
       textAlign,
       textMargin,
       shadowBlur,
-      shadowColor
+      shadowColor,
     } = rectCfg;
     const _node = nodes[index];
     const _tool = _node.tool ?? tool;
@@ -490,7 +579,7 @@ export class Flow {
       bgColor,
       aBgColor: activeBgColor,
       shadowBlur,
-      shadowColor
+      shadowColor,
     });
     this.drawText({
       x: _node.x,
@@ -508,7 +597,15 @@ export class Flow {
   };
   drawTool = (tool: toolType, node: any) => {
     const { x: _x1, y: _y1 } = node;
-    const { bgImg, title, x: _x2, y: _y2, corner, width, height } = tool;
+    const {
+      bgImg,
+      title,
+      x: _x2,
+      y: _y2,
+      corner = 0,
+      width = 0,
+      height = 0,
+    } = tool;
     const _x = _x1 + _x2;
     const _y = _y1 + _y2;
     const _w = width / 2;
@@ -526,7 +623,7 @@ export class Flow {
         bgColor: tool?.bgColor,
         aBgColor: tool?.activeBgColor,
         shadowColor: tool?.shadowColor,
-        shadowBlur: tool?.shadowBlur
+        shadowBlur: tool?.shadowBlur,
       });
     }
     if (title) {
@@ -540,29 +637,38 @@ export class Flow {
       });
     }
   };
-  drawLineInCanvas = (_Snode: any, index: number) => {
+  drawLineInCanvas = (j: number) => {
     const { nodes, activeLines, rectCfg, lineCfg } = this;
-    const { key: _key } = _Snode;
-    const { height } = rectCfg;
+    const { height = 0 } = rectCfg;
     const { width, label } = lineCfg;
-    const _index = this.getRectIndex(_Snode.toNodes[index]);
-    const _subKey = _Snode.toNodes[index];
+    const lines = this.lines;
+    const _Sindex = this.getRectIndex(lines[j].fromNode);
+    const _index = this.getRectIndex(lines[j].toNode);
+    const _Snode = nodes[_Sindex];
     const _Enode = nodes[_index];
-    if (_Enode) {
+    if (_Snode && _Enode) {
+      let _turnPoints: any = lines[j].turnPoints;
       const active = activeLines.find((item: any) => {
-        const { fromNodes: _fNodes, toNodes: _tNodes } = item;
-        return _fNodes === _key && _tNodes === _subKey;
+        const { fromNode: _fNode, toNode: _tNode } = item;
+        return _fNode === _Snode.key && _tNode === _Enode.key;
       });
       let _edit: boolean = false;
       if (this.editLine) {
-        const { fromNodes, toNodes } = this.editLine;
-        _edit = fromNodes === _key && toNodes === _subKey;
+        const { fromNode, toNode } = this.editLine;
+        _edit = fromNode === _Snode.key && toNode === _Enode.key;
       }
-      this.drawLine({
-        sx: _Snode.x,
-        sy: _Snode.y,
-        x: _Enode.x,
-        y: _Enode.y,
+      if (!lines[j].turnPoints?.length) {
+        _turnPoints = [
+          { x: _Snode.x, y: _Snode.y + (_Enode.y - _Snode.y) / 2 },
+          { x: _Enode.x, y: _Snode.y + (_Enode.y - _Snode.y) / 2 },
+        ];
+        lines[j].turnPoints = _turnPoints;
+      }
+      this.lines = lines;
+      this.drawLines({
+        start: _Snode,
+        turnPoints: _turnPoints,
+        end: _Enode,
         _w: width,
         _h: height / 2,
         active: active ? true : false,
@@ -570,7 +676,7 @@ export class Flow {
         label,
       });
       this.dragTriangle({
-        sy: _Snode.y,
+        sy: _turnPoints[_turnPoints.length - 1].y,
         x: _Enode.x,
         y: _Enode.y,
         _w: width,
@@ -582,40 +688,55 @@ export class Flow {
     }
   };
   initCanvas() {
-    const { nodes, ctx } = this;
+    const { nodes, ctx, lines } = this;
     if (ctx && nodes) {
+      for (let j = 0; j <= lines?.length - 1; j++) {
+        this.drawLineInCanvas(j);
+      }
       for (let i = 0; i <= nodes?.length - 1; i++) {
         this.drawNodeInCanvas(i);
-        const _node = nodes[i];
-        for (let j = 0; j <= _node.toNodes?.length - 1; j++) {
-          this.drawLineInCanvas(_node, j);
-        }
       }
     }
   }
   deleLine() {
     const { nodes, activeLines } = this;
     for (let i = 0; i <= activeLines?.length - 1; i++) {
-      const _index = this.getRectIndex(activeLines[i]?.fromNodes);
-      if (nodes[_index]) {
-        nodes[_index].toNodes = nodes[_index]?.toNodes.filter(
-          (a: any) => a !== activeLines[i].toNodes
+      const { lines } = this;
+      this.lines = lines.filter((item: any) => {
+        return !(
+          !(item.fromNode !== activeLines[i].fromNode) &&
+          !(item.toNode !== activeLines[i].toNode)
         );
-      }
+      });
     }
-    this.onChange?.(nodes);
+    this.onChange?.({
+      lines: this.lines,
+      nodes: this.nodes,
+    });
     this.activeLines = [];
   }
   deleRect() {
-    const { nodes } = this;
+    const { nodes, lines } = this;
     for (let i = 0; i <= nodes?.length - 1; i++) {
       nodes[i].toNodes = nodes[i].toNodes.filter((item: any) => {
         return item !== this.activeKey;
       });
+      nodes[i].fromNodes = nodes[i]?.fromNodes?.filter((item: any) => {
+        return item !== this.activeKey;
+      });
+      this.lines = lines.filter((item: any) => {
+        return (
+          item.fromNode !== this.activeKey && item.toNode !== this.activeKey
+        );
+      });
     }
     const _index = this.getRectIndex(this.activeKey);
     nodes.splice(_index, 1);
-    this.onChange?.(nodes);
+    this.nodes = nodes;
+    this.onChange?.({
+      lines: this.lines,
+      nodes: this.nodes,
+    });
     this.activeKey = null;
   }
   findToolInCanvas(x: number, y: number): any {
@@ -658,7 +779,7 @@ export class Flow {
   }
   findRectInCanvas(x: number, y: number): any {
     const { nodes, rectCfg } = this;
-    const { width, height, corner } = rectCfg;
+    const { width = 0, height = 0, corner } = rectCfg;
     const halfWidth = width / 2 || 50;
     const halfHeight = height / 2 || 15;
     for (let i = nodes?.length - 1; i >= 0; i--) {
@@ -675,12 +796,31 @@ export class Flow {
         y > nodes[i].y - halfHeight
       ) {
         if (realLen < maxLen) {
-          return { point: nodes[i], key: nodes[i].key };
+          return { point: nodes[i], key: nodes[i].key, index: i };
         }
       }
     }
   }
   findLeftRightLine(X: number, Y1: number, Y2: number) {
+    const { startY, endY, endX, startX } = this.selectArea;
+    const xIsInterset = X < endX && X > startX;
+    if (Y1 > Y2) {
+      if (Y1 > endY && Y2 < startY) {
+        return xIsInterset && true;
+      }
+    } else {
+      if (Y2 > endY && Y1 < startY) {
+        return xIsInterset && true;
+      }
+    }
+    if (Y1 > startY && Y1 < endY) {
+      return xIsInterset && true;
+    } else if (Y2 > startY && Y2 < endY) {
+      return xIsInterset && true;
+    }
+    return false;
+  }
+  findLeftRightLines(X: number, Y1: number, Y2: number) {
     const { startY, endY, endX, startX } = this.selectArea;
     const xIsInterset = X < endX && X > startX;
     if (Y1 > Y2) {
@@ -716,73 +856,87 @@ export class Flow {
   findEditLine() {
     this.editLine = null;
     const { x, y } = this.mouseDownXY;
+    console.log(this.activeLines);
     for (let i = 0; i <= this.activeLines?.length - 1; i++) {
-      let lineX = this.activeLines[i]?.x;
-      let lineY = this.activeLines[i]?.y;
+      let lineX = this.activeLines[i]?.x ?? 0;
+      let lineY = this.activeLines[i]?.y ?? 0;
       if (x > lineX - 20 && x < lineX + 20 && y > lineY - 5 && y < lineY + 5) {
         this.editLine = this.activeLines[i];
       }
     }
     this.render();
   }
-  findLineInCanvas() {
-    const { nodes, rectCfg } = this;
-    const { height } = rectCfg;
-    this.activeLines = [];
-    this.editLine = null;
-    for (let i = nodes?.length - 1; i >= 0; i--) {
-      for (let j = 0; j <= nodes[i].toNodes?.length - 1; j++) {
-        const _Sx = nodes[i].x;
-        const _Sy = nodes[i].y; //起点位置的X轴、Y轴
-        const _index = this.getRectIndex(nodes[i].toNodes[j]);
-        const _Ex = nodes[_index].x;
-        const _Ey = nodes[_index].y; //终点位置的X轴、Y轴
-        let halfY, firstLine, lastLine, centerLine; //halfY是指两个区域间中间一半的位置，firstLine是指出发后得第一条线，centerLine是中间线段，lastLine是出发后最后一条线
-        const _height = height / 2 || 15; //高度的一半
-        const _h = _height + 15; //处理线高度相差不大的情况
-        if ((_Sy > _Ey && _Sy > _Ey + _h) || (_Sy < _Ey && _Sy < _Ey - _h)) {
-          const _num = (_Sy - _Ey) / 2;
-          halfY = _Sy < _Ey ? _Sy + Math.abs(_num) : _Ey + Math.abs(_num);
-        } else {
-          halfY = _Sy < _Ey ? _Sy - 15 - _height : _Sy + 15;
-        }
-        if (_Sx < _Ex) {
-          firstLine = this.findLeftRightLine(_Sx, _Sy, halfY);
-          centerLine = this.findCenterLine(_Sx, halfY, _Ex);
-          lastLine = this.findLeftRightLine(_Ex, _Ey, halfY);
-        } else {
-          firstLine = this.findLeftRightLine(_Ex, _Ey, halfY);
-          centerLine = this.findCenterLine(_Ex, halfY, _Sx);
-          lastLine = this.findLeftRightLine(_Sx, _Sy, halfY);
-        }
-        if (firstLine || centerLine || lastLine) {
-          //有一个条件满足即视为在选中区域
-          let x = _Sx < _Ex ? _Sx + (_Ex - _Sx) / 2 : _Ex + (_Sx - _Ex) / 2;
-          this.activeLines.push({
-            fromNodes: nodes[i].key,
-            toNodes: nodes[i].toNodes[j],
-            x,
-            y: halfY,
-          });
+  findLinesInCanvas(x: number, y: number) {
+    const { lines } = this;
+    this.moveLine = null;
+    for (let i = 0; i <= lines.length - 1; i++) {
+      const { turnPoints: _ts } = lines[i];
+      if (_ts) {
+        const _yDev = _ts[0]?.y + 5 > y && _ts[0]?.y - 5 < y;
+        const _xCompare1 = _ts[0].x < x && _ts[1].x > x;
+        const _xCompare2 = _ts[0].x > x && _ts[1].x < x;
+        const _xDev =
+          _ts[1].x > _ts[0].x ? _yDev && _xCompare1 : _yDev && _xCompare2;
+        if (_yDev && _xDev) {
+          this.moveLine = lines[i];
+          break;
         }
       }
     }
     this.render();
   }
-  getXY = (margin) => {
+  findLineInCanvas() {
+    const { nodes, rectCfg, lines } = this;
+    const { height } = rectCfg;
+    this.activeLines = [];
+    this.editLine = null;
+    for (let i = lines?.length - 1; i >= 0; i--) {
+      let firstLine, lastLine, centerLine; //halfY是指两个区域间中间一半的位置，firstLine是指出发后得第一条线，centerLine是中间线段，lastLine是出发后最后一条线
+      const _Sindex = this.getRectIndex(lines[i].fromNode);
+      const _Eindex = this.getRectIndex(lines[i].toNode);
+      const _Snode = nodes[_Sindex];
+      const _Enode = nodes[_Eindex];
+      const { turnPoints } = lines[i];
+      const halfY = turnPoints?.[0]?.y ?? 0;
+      const _Sx = _Snode.x;
+      const _Sy = _Snode.y;
+      const _Ex = _Enode.x;
+      const _Ey = _Enode.y;
+      if (_Sx < _Ex) {
+        firstLine = this.findLeftRightLine(_Sx, _Sy, halfY);
+        centerLine = this.findCenterLine(_Sx, halfY, _Ex);
+        lastLine = this.findLeftRightLine(_Ex, _Ey, halfY);
+      } else {
+        firstLine = this.findLeftRightLine(_Ex, _Ey, halfY);
+        centerLine = this.findCenterLine(_Ex, halfY, _Sx);
+        lastLine = this.findLeftRightLine(_Sx, _Sy, halfY);
+      }
+      if (firstLine || centerLine || lastLine) {
+        //有一个条件满足即视为在选中区域
+        let x = _Sx < _Ex ? _Sx + (_Ex - _Sx) / 2 : _Ex + (_Sx - _Ex) / 2;
+        this.activeLines.push({
+          ...lines[i],
+          x,
+          y: halfY,
+        });
+      }
+    }
+    this.render();
+  }
+  getXY = (margin: any[]) => {
     switch (margin.length) {
       case 1:
-        return { x: margin[0], x2: margin[0], y: margin[0], y2: margin[0] }
+        return { x: margin[0], x2: margin[0], y: margin[0], y2: margin[0] };
       case 2:
-        return { x: margin[1], x2: margin[1], y: margin[0], y2: margin[0] }
+        return { x: margin[1], x2: margin[1], y: margin[0], y2: margin[0] };
       case 3:
-        return { x: margin[1], x2: margin[1], y: margin[0], y2: margin[2] }
+        return { x: margin[1], x2: margin[1], y: margin[0], y2: margin[2] };
       case 4:
-        return { x: margin[3], x2: margin[1], y: margin[0], y2: margin[2] }
+        return { x: margin[3], x2: margin[1], y: margin[0], y2: margin[2] };
       default:
-        return { x: 0, x2: 0, y: 0, y2: 0 }
+        return { x: 0, x2: 0, y: 0, y2: 0 };
     }
-  }
+  };
   drawText({
     x = 0,
     y = 0,
@@ -798,10 +952,10 @@ export class Flow {
   }: drawTextType) {
     if (this.ctx) {
       this.ctx.fillStyle = txtColor;
-      this.ctx.font = fontSize + " Arial";
+      this.ctx.font = `${fontSize} Calibri`; //fontSize + " Arial";
       let txtX = 0;
       let txtY = 0;
-      const _margin = this.getXY(margin)
+      const _margin = this.getXY(margin);
       const txtWidth = this.ctx.measureText(title as string).width;
       const padding = r < 5 ? 5 : r;
       if (align === "center") {
@@ -814,6 +968,114 @@ export class Flow {
       txtY = y + _margin?.y - _margin?.y2;
       active && (this.ctx.fillStyle = aTextColor);
       this.ctx.fillText(title as string, txtX, txtY);
+    }
+  }
+  drawLines({
+    start,
+    turnPoints,
+    end,
+    active = false,
+    _h = 15,
+    _w = 2,
+    color = "#50a9ff",
+    aColor = "orange",
+    label,
+  }: any) {
+    if (this.ctx) {
+      this.ctx.save();
+      this.ctx.beginPath();
+      let lastPoint = start;
+      if (start.y > end.y) {
+        this.ctx.lineTo(start.x, start.y - _h);
+      } else {
+        this.ctx.lineTo(start.x, start.y + _h);
+      }
+      for (let i = 0; i <= turnPoints?.length - 1; i++) {
+        lastPoint = turnPoints[i];
+      }
+      if (
+        start.key === this.moveLine?.fromNode &&
+        end.key === this.moveLine?.toNode
+      ) {
+        this.drawImage(
+          img,
+          lastPoint.x + (turnPoints[0].x - lastPoint.x) / 2,
+          lastPoint.y + (turnPoints[0].y - lastPoint.y) / 2,
+          5,
+          5
+        );
+      }
+      this.ctx.lineTo(turnPoints[0].x, turnPoints[0].y);
+      this.ctx.lineTo(turnPoints[1].x, turnPoints[1].y);
+      if (start.y > end.y) {
+        this.ctx.lineTo(end.x, end.y + _h);
+      } else {
+        this.ctx.lineTo(end.x, end.y - _h);
+      }
+      this.ctx.lineWidth = _w;
+      this.ctx.strokeStyle = color;
+      active && (this.ctx.strokeStyle = aColor);
+      this.ctx.stroke();
+      this.ctx.restore();
+      if (label && active) {
+        this.drawLinesRect(
+          turnPoints[0].x,
+          turnPoints[0].y,
+          turnPoints[1].x,
+          turnPoints[1].y
+        );
+      }
+    }
+  }
+  drawLinesRect(sx: number, sy: number, ex: number, ey: number) {
+    const { lineCfg } = this;
+    const { label } = lineCfg;
+    if (label) {
+      const {
+        width = 0,
+        height = 0,
+        title = "",
+        bgColor = "red",
+        corner = 0,
+        bgImg,
+        shadowBlur,
+        shadowColor,
+        textMargin,
+        textAlign,
+        txtColor,
+        aTextColor,
+        fontSize,
+      } = label;
+      const _xDis = Math.abs((sx - ex) / 2); //X方向点的距离
+      const xCenter = sx > ex ? ex + _xDis : sx + _xDis; //X方向中心点
+      if (bgImg) {
+        this.drawImage(bgImg, xCenter, sy, width, height);
+      } else {
+        this.drawRoundedRect({
+          x: xCenter,
+          y: sy,
+          r: corner,
+          hWidth: width,
+          hHeight: height,
+          bgColor,
+          shadowBlur,
+          shadowColor,
+        });
+      }
+      if (title) {
+        this.drawText({
+          x: xCenter,
+          y: sy + 5,
+          title: title,
+          hWidth: width,
+          r: corner,
+          align: textAlign,
+          margin: textMargin,
+          txtColor,
+          aTextColor,
+          fontSize,
+        });
+      }
     }
   }
   drawLine({
@@ -899,13 +1161,16 @@ export class Flow {
         width = 0,
         height = 0,
         title = "",
-        bgColor = "red",
+        bgColor = "",
         corner = 0,
         bgImg,
         shadowBlur,
         shadowColor,
         textMargin,
-        textAlign
+        textAlign,
+        txtColor,
+        aTextColor,
+        fontSize,
       } = label;
       const _xDis = Math.abs((sx - ex) / 2); //X方向点的距离
       const xCenter = sx > ex ? ex + _xDis : sx + _xDis; //X方向中心点
@@ -928,7 +1193,7 @@ export class Flow {
           hHeight: height,
           bgColor,
           shadowBlur,
-          shadowColor
+          shadowColor,
         });
       }
       if (title) {
@@ -939,7 +1204,10 @@ export class Flow {
           hWidth: width,
           r: corner,
           align: textAlign,
-          margin: textMargin
+          margin: textMargin,
+          txtColor,
+          aTextColor,
+          fontSize,
         });
       }
     }
@@ -1016,9 +1284,16 @@ export class Flow {
   }
   drawDrid() {
     if (this.ctx) {
-      const { width: _w, height: _h } = this.canvas
-      const { color = "#dddddd", space = 100, width = 0.5, type = "point", stepX = 20, stepY = 20 } = this.gradConfig
-      this.ctx.save()
+      const { width: _w, height: _h } = this.canvas;
+      const {
+        color = "#dddddd",
+        space = 100,
+        width = 0.5,
+        type = "point",
+        stepX = 20,
+        stepY = 20,
+      } = this.gradConfig;
+      this.ctx.save();
       this.ctx.strokeStyle = color;
       if (type === "line") {
         this.ctx.lineWidth = width;

@@ -2,6 +2,7 @@ import { propsType, drawTextType, drawLineType, drawTriangleType, drawRoundedTyp
 export declare class Flow {
     private ctx;
     private nodes;
+    private lines;
     private canvas;
     private wrapper;
     private lineCfg;
@@ -9,6 +10,7 @@ export declare class Flow {
     private gradConfig;
     private selectArea;
     private activeLines;
+    private moveLine;
     private activeKey;
     private lastMouseUpTime;
     private editLine;
@@ -21,11 +23,11 @@ export declare class Flow {
     private leftMouseDown;
     private drawElement;
     private drawLineModel;
-    private lineFormNodeKey;
+    private lineFromNodeKey;
     private onChange?;
     private onDBClick?;
     private onChangePosition?;
-    constructor({ flowNodes, canvas, wrapper, rectConfig, lineConfig, gradConfig, onChange, onDBClick, onChangePosition, }: propsType);
+    constructor({ flowNodes, flowLines, canvas, wrapper, rectConfig, lineConfig, gradConfig, onChange, onDBClick, onChangePosition, }: propsType);
     resetValues(): void;
     initListenEvent(): void;
     throttle: (fn: {
@@ -34,8 +36,11 @@ export declare class Flow {
     onListenKeyDown: () => void;
     onListenKeyUp: () => void;
     onConectLine: (offsetX: number, offsetY: number) => void;
-    onListenMouseMove: (event: MouseEvent) => void;
-    onConectNode: (index: number, node: any) => void;
+    onMoveNode: (offsetX: number, offsetY: number, _index: number) => void;
+    onConnectLine: (offsetX: number, offsetY: number, _index: number) => void;
+    cloneObject: (val: any) => any;
+    onListenMouseMove: (event?: MouseEvent) => void;
+    onConectNode: (Findex: number, Eindex: number) => void;
     onListenMouseUp: () => void;
     onDragRect: (event: MouseEvent) => void;
     onListenDBClick(): void;
@@ -49,23 +54,27 @@ export declare class Flow {
     getRectIndex(key: any): number;
     drawNodeInCanvas: (index: number) => void;
     drawTool: (tool: toolType, node: any) => void;
-    drawLineInCanvas: (_Snode: any, index: number) => void;
+    drawLineInCanvas: (j: number) => void;
     initCanvas(): void;
     deleLine(): void;
     deleRect(): void;
     findToolInCanvas(x: number, y: number): any;
     findRectInCanvas(x: number, y: number): any;
     findLeftRightLine(X: number, Y1: number, Y2: number): boolean;
+    findLeftRightLines(X: number, Y1: number, Y2: number): boolean;
     findCenterLine(X1: number, Y: number, X2: number): boolean;
     findEditLine(): void;
+    findLinesInCanvas(x: number, y: number): void;
     findLineInCanvas(): void;
-    getXY: (margin: any) => {
+    getXY: (margin: any[]) => {
         x: any;
         x2: any;
         y: any;
         y2: any;
     };
     drawText({ x, y, title, active, hWidth, txtColor, aTextColor, fontSize, margin, align, r, }: drawTextType): void;
+    drawLines({ start, turnPoints, end, active, _h, _w, color, aColor, label, }: any): void;
+    drawLinesRect(sx: number, sy: number, ex: number, ey: number): void;
     drawLine({ sx, sy, x, y, active, _h, _w, color, aColor, label, }: drawLineType): void;
     dragTriangle({ sy, x, y, _w, _h, _xDev, color, aColor, active, }: drawTriangleType): void;
     drawLineRect(sx: number, sy: number, ex: number, ey: number): void;

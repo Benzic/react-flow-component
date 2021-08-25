@@ -1,7 +1,7 @@
 /*
  * @Author: benzic
  * @Date: 2021-03-17 10:59:10
- * @LastEditTime: 2021-08-16 14:15:47
+ * @LastEditTime: 2021-08-25 17:35:57
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\flow\base.ts
@@ -61,6 +61,7 @@ export class Flow {
   private lineFromNodeKey: any = null; //画线模式下的开始节点
   private onChange?: (val: any) => void;
   private onDBClick?: (val: dbClickType) => void;
+  private onConnect?: (val: any) => boolean;
   private onChangePosition?: (val: {
     translateX: number;
     translateY: number;
@@ -74,6 +75,7 @@ export class Flow {
     lineConfig,
     gradConfig,
     onChange,
+    onConnect,
     onDBClick,
     onChangePosition,
   }: propsType) {
@@ -86,6 +88,7 @@ export class Flow {
     this.rectCfg = rectConfig ?? {};
     this.gradConfig = gradConfig ?? {};
     this.onDBClick = onDBClick;
+    this.onConnect = onConnect;
     this.onChange = onChange;
     this.onChangePosition = onChangePosition;
     this.resetValues();
@@ -177,6 +180,7 @@ export class Flow {
   };
   onMoveNode = (offsetX: number, offsetY: number, _index: number) => {
     const { xCorrecting = 10, yCorrecting = 5 } = this.rectCfg;
+    const { move } = this.lineCfg
     const { lines } = this;
     //单击拖动节点位移
     if (this.nodes[_index].active) {
@@ -187,13 +191,23 @@ export class Flow {
       this.nodes[_index].x = _xDev; //校正X位移
       this.nodes[_index].y = _yDev; //校正Y位移
       for (let i = 0; i <= lines?.length - 1; i++) {
-        const { turnPoints } = lines[i];
+        const { turnPoints, fromNode, toNode } = lines[i];
         let _turnPoints = this.cloneObject(turnPoints);
         if (lines[i].fromNode === this.nodes[_index].key) {
           _turnPoints[0].x = _xDev; //线条调整第一个点
+          if (!move) {
+            const _index1 = this.getRectIndex(toNode) ?? 0;
+            _turnPoints[0].y = this.nodes[_index].y + (this.nodes[_index1].y - this.nodes[_index].y) / 2
+            _turnPoints[1].y = this.nodes[_index].y + (this.nodes[_index1].y - this.nodes[_index].y) / 2
+          }
         }
         if (lines[i].toNode === this.nodes[_index].key) {
           _turnPoints[1].x = _xDev; //线条调整第二个点
+          if (!move) {
+            const _index1 = this.getRectIndex(fromNode) ?? 0
+            _turnPoints[0].y = this.nodes[_index1].y + (this.nodes[_index].y - this.nodes[_index1].y) / 2
+            _turnPoints[1].y = this.nodes[_index1].y + (this.nodes[_index].y - this.nodes[_index1].y) / 2
+          }
         }
         lines[i] = {
           ...lines[i],
@@ -303,7 +317,16 @@ export class Flow {
     let _ENode = this.nodes?.[Eindex];
     const _FLevel = _FNode?.level ?? 0;
     const _ELevel = _ENode?.level ?? 0;
+    if (
+      levelLimit &&
+      this.onConnect &&
+      !this.onConnect?.({ FNode: _FNode, ENode: _ENode })
+    ) {
+      //连线回掉函数确认是否连线
+      return;
+    }
     if (levelLimit && _ELevel < _FLevel) {
+      //如果不需要回掉函数限制，仅根据level大小判断
       return;
     }
     if (
@@ -316,6 +339,7 @@ export class Flow {
     }
     const _Y = (_FNode.y - _ENode?.y) / 2;
     this.lines = [
+      //增加线条
       ...this.lines,
       {
         fromNode: _FNode.key,
@@ -327,8 +351,18 @@ export class Flow {
         ],
       },
     ];
-    _FNode.toNodes = [..._FNode.toNodes, _ENode?.key];
-    _ENode.fromNodes = [..._ENode?.fromNodes, _FNode.key];
+    if (_FNode.toNodes?.length) {
+      //增加来源关系
+      _FNode.toNodes = [..._FNode?.toNodes, _ENode?.key];
+    } else {
+      _FNode.toNodes = [_ENode?.key];
+    }
+    if (_ENode.fromNodes?.length) {
+      //增加来源关系
+      _ENode.fromNodes = [..._ENode?.fromNodes, _FNode?.key];
+    } else {
+      _ENode.fromNodes = [_FNode?.key];
+    }
     this.nodes[Findex] = _FNode;
     this.nodes[Eindex] = _ENode;
     this.onChange?.({
@@ -388,15 +422,7 @@ export class Flow {
       if (!this.cancelDBClick) {
         const { offsetY, offsetX } = event;
         const { translateX: _X, translateY: _Y } = this;
-        const _node = this.findRectInCanvas(offsetX - _X, offsetY - _Y);
-        this.mouseDownXY.x = offsetX - _X;
-        this.mouseDownXY.y = offsetY - _Y;
-        this.findEditLine();
         this.findToolInCanvas(offsetX - _X, offsetY - _Y);
-        if (_node) {
-          //双击节点
-          this.onDBClick?.({ node: _node, type: "node" });
-        }
         if (this.activeTool) {
           //双击ICON
           this.onDBClick &&
@@ -405,6 +431,15 @@ export class Flow {
               node: this.activeTool,
             });
         }
+        const _node = this.findRectInCanvas(offsetX - _X, offsetY - _Y);
+        this.mouseDownXY.x = offsetX - _X;
+        this.mouseDownXY.y = offsetY - _Y;
+        this.findEditLine();
+        if (_node) {
+          //双击节点
+          this.onDBClick?.({ node: _node, type: "node" });
+        }
+
         if (this.editLine) {
           //双击线
           this.onDBClick?.({
@@ -699,16 +734,31 @@ export class Flow {
     }
   }
   deleLine() {
-    const { nodes, activeLines } = this;
+    let { nodes, activeLines } = this;
     for (let i = 0; i <= activeLines?.length - 1; i++) {
       const { lines } = this;
+      const { toNode, fromNode } = activeLines[i];
       this.lines = lines.filter((item: any) => {
-        return !(
-          !(item.fromNode !== activeLines[i].fromNode) &&
-          !(item.toNode !== activeLines[i].toNode)
-        );
+        return !(!(item.fromNode !== fromNode) && !(item.toNode !== toNode));
       });
+      for (let j = 0; j <= nodes?.length - 1; j++) {
+        const { toNodes, fromNodes, key } = nodes[j];
+        if (
+          (toNodes?.includes(toNode) && key === fromNode) ||
+          (fromNodes?.includes(fromNode) && key === toNode)
+        ) {
+          //去掉节点间得关联关系
+          let _tNodes = toNodes.filter((item: any) => {
+            return item !== toNode;
+          });
+          let _fNodes = fromNodes?.filter((item: any) => {
+            return item !== fromNode;
+          });
+          nodes[j] = { ...nodes[j], toNodes: _tNodes, fromNodes: _fNodes };
+        }
+      }
     }
+    this.nodes = nodes;
     this.onChange?.({
       lines: this.lines,
       nodes: this.nodes,
@@ -760,22 +810,25 @@ export class Flow {
         const realLen = Math.sqrt(Math.pow(_x1, 2) + Math.pow(_y1, 2)); //实际点击的位置距离矩形中心的距离
         const maxLen =
           Math.sqrt(Math.pow(_hw - _r, 2) + Math.pow(_hy - _r, 2)) + _r; //最外围距离矩形中心的距离
-        if (
-          x < nodes[i].x + _x + _hw &&
-          x > nodes[i].x + _x - _hw &&
-          y < nodes[i].y + _hy + _y &&
-          y > nodes[i].y - _hy + _y
-        ) {
-          if (realLen < maxLen) {
-            if (nodes[i].key !== this.activeKey) {
-              rect = { point: nodes[i], key: nodes[i].key };
-              break;
-            }
-          }
+        console.log(realLen, maxLen);
+        // if (
+        //   x < nodes[i].x + _x + _hw &&
+        //   x > nodes[i].x + _x - _hw &&
+        //   y < nodes[i].y + _hy + _y &&
+        //   y > nodes[i].y - _hy + _y
+        // ) {
+
+        // }
+        if (realLen < maxLen) {
+          // if (nodes[i].key !== this.activeKey) {
+          rect = { point: nodes[i], key: nodes[i].key };
+          break;
+          //}
         }
       }
     }
     this.activeTool = rect;
+    console.log(rect);
   }
   findRectInCanvas(x: number, y: number): any {
     const { nodes, rectCfg } = this;

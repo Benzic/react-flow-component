@@ -26,8 +26,9 @@ export declare class Flow {
     private lineFromNodeKey;
     private onChange?;
     private onDBClick?;
+    private onConnect?;
     private onChangePosition?;
-    constructor({ flowNodes, flowLines, canvas, wrapper, rectConfig, lineConfig, gradConfig, onChange, onDBClick, onChangePosition, }: propsType);
+    constructor({ flowNodes, flowLines, canvas, wrapper, rectConfig, lineConfig, gradConfig, onChange, onConnect, onDBClick, onChangePosition, }: propsType);
     resetValues(): void;
     initListenEvent(): void;
     throttle: (fn: {

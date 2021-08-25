@@ -1,6 +1,6 @@
 {
   "name": "react-flow-component",
-  "version": "0.3.25",
+  "version": "0.3.28",
   "description": "a work-flow component for react",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

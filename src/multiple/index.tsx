@@ -1,7 +1,7 @@
 /*
  * @Author: benzic
  * @Date: 2021-03-17 10:59:36
- * @LastEditTime: 2021-08-16 16:17:36
+ * @LastEditTime: 2021-08-23 14:02:47
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\flow\mutiple.tsx
@@ -31,6 +31,7 @@ const MultipleFlow: React.FC<{
   cref?: any;
   gradConfig?: grdCfg;
   onChange?: (val: any) => void;
+  onConnect?: (val: any) => boolean;
   onDBClick?: (val: dbClickType) => void;
   onChangePosition?: (val: { translateX: number; translateY: number }) => void;
 }> = forwardRef(
@@ -42,6 +43,7 @@ const MultipleFlow: React.FC<{
     gradConfig,
     cref,
     onChange,
+    onConnect,
     onDBClick,
     onChangePosition,
   }) => {
@@ -65,6 +67,7 @@ const MultipleFlow: React.FC<{
         flowLines,
         gradConfig,
         onChange,
+        onConnect,
         onDBClick,
         onChangePosition,
       });

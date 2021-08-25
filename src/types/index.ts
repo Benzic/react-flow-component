@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-06-18 15:19:37
- * @LastEditTime: 2021-08-13 14:07:12
+ * @LastEditTime: 2021-08-23 14:02:09
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \BigDataAP\src\views\caseAnalysis\flow\interface.ts
@@ -112,6 +112,7 @@ export interface propsType {
   lineConfig?: lineCfg;
   gradConfig?: grdCfg;
   onChange?: (val: any) => void;
+  onConnect?:(val: any) => boolean;
   onDBClick?: (val: dbClickType) => void;
   onChangePosition?: (val: { translateX: number; translateY: number }) => void;
 }

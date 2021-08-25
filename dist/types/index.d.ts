@@ -105,6 +105,7 @@ export interface propsType {
     lineConfig?: lineCfg;
     gradConfig?: grdCfg;
     onChange?: (val: any) => void;
+    onConnect?: (val: any) => boolean;
     onDBClick?: (val: dbClickType) => void;
     onChangePosition?: (val: {
         translateX: number;

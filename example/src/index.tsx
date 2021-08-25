@@ -37,7 +37,7 @@ const treeData = [
     name: '测试4',
     key: '0-3',
     children: [
-      { name: '子项D01', key: '0-3-1', type: 1 },
+      { name: '子项D01', key: '0-3-1', type: 1, level: 1, },
       { name: '子项D02', key: '0-3-2', type: 1 },
       { name: '子项D03', key: '0-3-3', type: 2 },
       { name: '子项D04', key: '0-3-4', type: 2 },
@@ -47,8 +47,8 @@ const treeData = [
     name: '测试3',
     key: '0-4',
     children: [
-      { name: '子项E01', key: '0-4-1', type: 1 },
-      { name: '子项E02', key: '0-4-2', type: 1 },
+      { name: '子项E01', key: '0-4-1', type: 1, level: 2 },
+      { name: '子项E02', key: '0-4-2', type: 1, level: 3 },
       { name: '子项E03', key: '0-4-3', type: 2 },
       { name: '子项E04', key: '0-4-4', type: 2 },
     ],
@@ -57,10 +57,10 @@ const treeData = [
     name: '测试2',
     key: '0-5',
     children: [
-      { name: '子项F01', key: '0-5-1', type: 1 },
-      { name: '子项F02', key: '0-5-2', type: 1 },
-      { name: '子项F03', key: '0-5-3', type: 2 },
-      { name: '子项F04', key: '0-5-4', type: 2 },
+      { name: '子项F01', key: '0-5-1', type: 1, level: 3 },
+      { name: '子项F02', key: '0-5-2', type: 1, level: 3 },
+      { name: '子项F03', key: '0-5-3', type: 2, level: 3 },
+      { name: '子项F04', key: '0-5-4', type: 2, level: 3 },
     ],
   },
   {
@@ -88,7 +88,8 @@ const App: React.FC = () => {
       x: evt.clientX - evt.target.offsetLeft,
       y: evt.clientY - evt.target.offsetTop,
       name: evt.target.dataset.name,
-      key: evt.target.dataset.key
+      key: evt.target.dataset.key,
+      level: evt.target.dataset.level
     })
   }
   window.ondragover = function (event) {
@@ -109,7 +110,8 @@ const App: React.FC = () => {
         x: evt.clientX - offset_x + 50 - 200,
         y: evt.clientY - offset_y + 15,
         active: false,
-        toNodes: []
+        toNodes: [],
+        level: currentKey.level
       }]);
     }
   }
@@ -125,9 +127,9 @@ const App: React.FC = () => {
               } else {
                 setShowKeys([...showKeys, index])
               }
-            }} key={item.key} data-name={item.name} data-key={item.key}>{item.name}</div>
+            }} key={item.key} data-name={item.name}  data-key={item.key}>{item.name}</div>
             {item.children.map((itx) => {
-              return <div draggable className="list_child" key={itx.key} data-name={itx.name} data-key={itx.key}>
+              return <div draggable className="list_child" key={itx.key} data-level={itx.level} data-name={itx.name} data-key={itx.key}>
                 {itx.name}
               </div>
             })}
@@ -145,7 +147,14 @@ const App: React.FC = () => {
         bgColor: "white",
         shadowBlur: 20,
         shadowColor: "rgba(0,0,0,0.2)",
-        textMargin: [5, 0, 0, 0]
+        textMargin: [5, 0, 0, 0],
+        tool: {
+          x: 50,
+          y: 30,
+          width: 15,
+          height: 15,
+          bgColor: "green"
+        }
       }} lineConfig={{
         move: true,
         label: {
@@ -156,9 +165,19 @@ const App: React.FC = () => {
           txtColor: "white",
           fontSize: "9px"
         },
+        levelLimit: false
       }} flowLines={lineList} gradConfig={{ type: "point", color: "#999" }} flowNodes={selectedKeys} onChange={(val) => {
         console.log(val)
         setLineList(val.lines)
+      }} onConnect={(val) => {
+        console.log(val);
+        if (!val.ENode.level) {
+          return false
+        }
+        if (val.FNode.level > val.ENode.level) {
+          return false
+        }
+        return true
       }}></MultipleFlow>
     </div>
   </div>;

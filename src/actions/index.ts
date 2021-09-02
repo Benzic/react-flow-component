@@ -1,7 +1,7 @@
 /*
  * @Author: benzic
  * @Date: 2021-03-17 10:59:10
- * @LastEditTime: 2021-08-25 17:35:57
+ * @LastEditTime: 2021-09-01 17:01:33
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\flow\base.ts
@@ -180,7 +180,7 @@ export class Flow {
   };
   onMoveNode = (offsetX: number, offsetY: number, _index: number) => {
     const { xCorrecting = 10, yCorrecting = 5 } = this.rectCfg;
-    const { move } = this.lineCfg
+    const { move } = this.lineCfg;
     const { lines } = this;
     //单击拖动节点位移
     if (this.nodes[_index].active) {
@@ -197,16 +197,24 @@ export class Flow {
           _turnPoints[0].x = _xDev; //线条调整第一个点
           if (!move) {
             const _index1 = this.getRectIndex(toNode) ?? 0;
-            _turnPoints[0].y = this.nodes[_index].y + (this.nodes[_index1].y - this.nodes[_index].y) / 2
-            _turnPoints[1].y = this.nodes[_index].y + (this.nodes[_index1].y - this.nodes[_index].y) / 2
+            _turnPoints[0].y =
+              this.nodes[_index].y +
+              (this.nodes[_index1].y - this.nodes[_index].y) / 2;
+            _turnPoints[1].y =
+              this.nodes[_index].y +
+              (this.nodes[_index1].y - this.nodes[_index].y) / 2;
           }
         }
         if (lines[i].toNode === this.nodes[_index].key) {
           _turnPoints[1].x = _xDev; //线条调整第二个点
           if (!move) {
-            const _index1 = this.getRectIndex(fromNode) ?? 0
-            _turnPoints[0].y = this.nodes[_index1].y + (this.nodes[_index].y - this.nodes[_index1].y) / 2
-            _turnPoints[1].y = this.nodes[_index1].y + (this.nodes[_index].y - this.nodes[_index1].y) / 2
+            const _index1 = this.getRectIndex(fromNode) ?? 0;
+            _turnPoints[0].y =
+              this.nodes[_index1].y +
+              (this.nodes[_index].y - this.nodes[_index1].y) / 2;
+            _turnPoints[1].y =
+              this.nodes[_index1].y +
+              (this.nodes[_index].y - this.nodes[_index1].y) / 2;
           }
         }
         lines[i] = {
@@ -353,15 +361,19 @@ export class Flow {
     ];
     if (_FNode.toNodes?.length) {
       //增加来源关系
-      _FNode.toNodes = [..._FNode?.toNodes, _ENode?.key];
+      // _FNode.toNodes = [..._FNode?.toNodes, _ENode?.key];
+      _FNode = { ..._FNode, toNodes: [..._FNode?.toNodes, _ENode?.key] };
     } else {
-      _FNode.toNodes = [_ENode?.key];
+      _FNode = { ..._FNode, toNodes:  [_ENode?.key] };
+      // _FNode.toNodes = [_ENode?.key];
     }
     if (_ENode.fromNodes?.length) {
       //增加来源关系
-      _ENode.fromNodes = [..._ENode?.fromNodes, _FNode?.key];
+      _ENode = { ..._ENode, fromNodes: [..._ENode?.fromNodes, _FNode?.key] };
+     // _ENode.fromNodes = [..._ENode?.fromNodes, _FNode?.key];
     } else {
-      _ENode.fromNodes = [_FNode?.key];
+      _ENode = { ..._ENode, fromNodes:  [_FNode?.key] };
+      // _ENode.fromNodes = [_FNode?.key];
     }
     this.nodes[Findex] = _FNode;
     this.nodes[Eindex] = _ENode;

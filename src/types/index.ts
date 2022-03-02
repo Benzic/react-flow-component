@@ -62,6 +62,7 @@ export interface rectCfg {
   height?: number; //高度
   xCorrecting?: number; //x方向位置校正
   yCorrecting?: number; //y方向位置校正
+  txtColor?: any;//文本颜色
   textMargin?: number[]; //文本位置偏移
   textAlign?: "center" | "left" | "right";
   corner?: number; //圆角
@@ -71,6 +72,7 @@ export interface rectCfg {
   shadowBlur?: number; //阴影范围
   shadowColor?: string; //阴影颜色
   tool?: toolType; //按钮
+  textEllipsis?: boolean//文本省略
 }
 export interface selectAreaType {
   startX: number;
@@ -112,7 +114,7 @@ export interface propsType {
   lineConfig?: lineCfg;
   gradConfig?: grdCfg;
   onChange?: (val: any) => void;
-  onConnect?:(val: any) => boolean;
+  onConnect?: (val: any) => boolean;
   onDBClick?: (val: dbClickType) => void;
   onChangePosition?: (val: { translateX: number; translateY: number }) => void;
 }
@@ -128,6 +130,7 @@ export interface drawTextType {
   margin?: number[];
   active?: boolean;
   r?: number;
+  textEllipsis?: boolean
 }
 
 export interface drawLineType {

@@ -73,7 +73,7 @@ export declare class Flow {
         y: any;
         y2: any;
     };
-    drawText({ x, y, title, active, hWidth, txtColor, aTextColor, fontSize, margin, align, r, }: drawTextType): void;
+    drawText({ x, y, title, active, hWidth, txtColor, aTextColor, fontSize, margin, align, r, textEllipsis }: drawTextType): void;
     drawLines({ start, turnPoints, end, active, _h, _w, color, aColor, label, }: any): void;
     drawLinesRect(sx: number, sy: number, ex: number, ey: number): void;
     drawLine({ sx, sy, x, y, active, _h, _w, color, aColor, label, }: drawLineType): void;

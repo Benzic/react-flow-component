@@ -1,7 +1,7 @@
 /*
  * @Author: benzic
  * @Date: 2021-03-17 10:59:10
- * @LastEditTime: 2021-09-01 17:01:33
+ * @LastEditTime: 2021-09-28 16:56:24
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \my-app\src\flow\base.ts
@@ -294,6 +294,10 @@ export class Flow {
                   }
                 }
                 this.lines = lines;
+                this.onChange?.({
+                  lines: this.lines,
+                  nodes: this.nodes,
+                });
                 this.render();
               } else {
                 //框选
@@ -325,6 +329,9 @@ export class Flow {
     let _ENode = this.nodes?.[Eindex];
     const _FLevel = _FNode?.level ?? 0;
     const _ELevel = _ENode?.level ?? 0;
+    if (_FNode.key === _ENode.key) {
+      return
+    }
     if (
       levelLimit &&
       this.onConnect &&
@@ -364,15 +371,15 @@ export class Flow {
       // _FNode.toNodes = [..._FNode?.toNodes, _ENode?.key];
       _FNode = { ..._FNode, toNodes: [..._FNode?.toNodes, _ENode?.key] };
     } else {
-      _FNode = { ..._FNode, toNodes:  [_ENode?.key] };
+      _FNode = { ..._FNode, toNodes: [_ENode?.key] };
       // _FNode.toNodes = [_ENode?.key];
     }
     if (_ENode.fromNodes?.length) {
       //增加来源关系
       _ENode = { ..._ENode, fromNodes: [..._ENode?.fromNodes, _FNode?.key] };
-     // _ENode.fromNodes = [..._ENode?.fromNodes, _FNode?.key];
+      // _ENode.fromNodes = [..._ENode?.fromNodes, _FNode?.key];
     } else {
-      _ENode = { ..._ENode, fromNodes:  [_FNode?.key] };
+      _ENode = { ..._ENode, fromNodes: [_FNode?.key] };
       // _ENode.fromNodes = [_FNode?.key];
     }
     this.nodes[Findex] = _FNode;
@@ -609,9 +616,11 @@ export class Flow {
       bgColor,
       tool,
       textAlign,
+      txtColor,
       textMargin,
       shadowBlur,
       shadowColor,
+      textEllipsis
     } = rectCfg;
     const _node = nodes[index];
     const _tool = _node.tool ?? tool;
@@ -636,7 +645,9 @@ export class Flow {
       title: _node.name,
       active: activeKey === _node.key,
       hWidth: width / 2,
+      txtColor: txtColor,
       r: _node.corner ?? corner,
+      textEllipsis
     });
     if (_tool) {
       this.drawTool(_tool, _node);
@@ -1009,30 +1020,62 @@ export class Flow {
     active = false,
     hWidth = 50,
     txtColor = "black",
-    aTextColor = "white",
+    aTextColor = "black",
     fontSize = "11px",
     margin = [0, 0, 0, 0],
     align = "center",
     r = 5,
+    textEllipsis = false
   }: drawTextType) {
     if (this.ctx) {
+      // this.ctx.fillStyle = txtColor;
+      // this.ctx.font = `${fontSize} Calibri`; //fontSize + " Arial";
+      // let txtX = 0;
+      // let txtY = 0;
+      // const _margin = this.getXY(margin);
+      // const txtWidth = this.ctx.measureText(title as string).width;
+      // const padding = r < 5 ? 5 : r;
+      // if (align === "center") {
+      //   txtX = x - txtWidth / 2 + _margin?.x - _margin?.x2;
+      // } else if (align === "left") {
+      //   txtX = x - hWidth + padding + _margin?.x - _margin?.x2;
+      // } else if (align === "right") {
+      //   txtX = x + (hWidth - txtWidth) - padding + _margin?.x - _margin?.x2;
+      // }
+      // txtY = y + _margin?.y - _margin?.y2;
+      // active && (this.ctx.fillStyle = aTextColor);
+      // this.ctx.fillText(title as string, txtX, txtY);
       this.ctx.fillStyle = txtColor;
       this.ctx.font = `${fontSize} Calibri`; //fontSize + " Arial";
-      let txtX = 0;
-      let txtY = 0;
-      const _margin = this.getXY(margin);
-      const txtWidth = this.ctx.measureText(title as string).width;
-      const padding = r < 5 ? 5 : r;
+      let txtX = 0, txtY = 0, _index = 0, _text: any = "";
+      const _margin = this?.getXY(margin);
+      let _width = Math.abs(_margin?.x) + Math.abs(_margin?.x2);
+      let _title = title?.toString()
+      if (hWidth && textEllipsis) {
+        for (let i = 0; i <= _title?.length - 1; i++) {
+          const fontWidth = this.ctx.measureText(_title[i]).width;
+          _width += fontWidth;
+          if (_width < hWidth * 2 - _margin?.x - _margin?.x2) {
+            _index++
+            _text = _title.substring(0, _index)
+          } else {
+            _text = _title.substring(0, _index) + "..."
+          }
+        }
+      } else {
+        _text = _title
+      }
+      const txtWidth = this.ctx.measureText(_text as string).width;
       if (align === "center") {
         txtX = x - txtWidth / 2 + _margin?.x - _margin?.x2;
       } else if (align === "left") {
-        txtX = x - hWidth + padding + _margin?.x - _margin?.x2;
+        txtX = x + _margin?.x - _margin?.x2;
       } else if (align === "right") {
-        txtX = x + (hWidth - txtWidth) - padding + _margin?.x - _margin?.x2;
+        txtX = x + txtWidth + _margin?.x - _margin?.x2;
       }
-      txtY = y + _margin?.y - _margin?.y2;
       active && (this.ctx.fillStyle = aTextColor);
-      this.ctx.fillText(title as string, txtX, txtY);
+      txtY = y + _margin?.y - _margin?.y2;
+      this.ctx.fillText(_text as string, txtX, txtY);
     }
   }
   drawLines({

@@ -52,6 +52,7 @@ export interface rectCfg {
     height?: number;
     xCorrecting?: number;
     yCorrecting?: number;
+    txtColor?: any;
     textMargin?: number[];
     textAlign?: "center" | "left" | "right";
     corner?: number;
@@ -61,6 +62,7 @@ export interface rectCfg {
     shadowBlur?: number;
     shadowColor?: string;
     tool?: toolType;
+    textEllipsis?: boolean;
 }
 export interface selectAreaType {
     startX: number;
@@ -124,6 +126,7 @@ export interface drawTextType {
     margin?: number[];
     active?: boolean;
     r?: number;
+    textEllipsis?: boolean;
 }
 export interface drawLineType {
     sx: number;

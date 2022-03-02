@@ -37,10 +37,10 @@ const treeData = [
     name: '测试4',
     key: '0-3',
     children: [
-      { name: '子项D01', key: '0-3-1', type: 1, level: 1, },
-      { name: '子项D02', key: '0-3-2', type: 1 },
-      { name: '子项D03', key: '0-3-3', type: 2 },
-      { name: '子项D04', key: '0-3-4', type: 2 },
+      { name: '子项D0123213213213213123213213', key: '0-3-1', type: 1, level: 1, },
+      { name: '子项D023333333333333333333333', key: '0-3-2', type: 1 },
+      { name: '子项D0322222222222222222222222222222222222222', key: '0-3-3', type: 2 },
+      { name: '子项D0421111111111111111111111', key: '0-3-4', type: 2 },
     ],
   },
   {
@@ -81,6 +81,29 @@ const App: React.FC = () => {
   const [showKeys, setShowKeys] = useState([])
   const [lineList, setLineList] = useState([])
   const dragBox = useRef(null)
+  // useEffect(()=>{
+  //   loadNodes()
+  // },[])
+  // const loadNodes = () => {
+  //   console.time();
+  //   let list = []
+  //   for (let i = 0; i <= 500; i++) {
+  //     let x = Math.random() * 600;
+  //     let y = Math.random() * 600;
+  //     list.push({
+  //       name:"rect",
+  //       key: i,
+  //       x: x,
+  //       y: y,
+  //       active: false,
+  //       toNodes: [],
+  //       level: 0
+  //     })
+  //   }
+  //   setSelectedKeys(list);
+  //   console.timeEnd();
+  // }
+
   window.ondragstart = function (event) {
     setZindex(100)
     const evt = event || window.event;
@@ -127,7 +150,7 @@ const App: React.FC = () => {
               } else {
                 setShowKeys([...showKeys, index])
               }
-            }} key={item.key} data-name={item.name}  data-key={item.key}>{item.name}</div>
+            }} key={item.key} data-name={item.name} data-key={item.key}>{item.name}</div>
             {item.children.map((itx) => {
               return <div draggable className="list_child" key={itx.key} data-level={itx.level} data-name={itx.name} data-key={itx.key}>
                 {itx.name}
@@ -143,14 +166,16 @@ const App: React.FC = () => {
       }} rectConfig={{
         width: 100,
         height: 30,
-        activeBgColor: "red",
-        bgColor: "white",
+        activeBgColor: "white",
+        bgColor: "pink",
         shadowBlur: 20,
+        txtColor: "red",
         shadowColor: "rgba(0,0,0,0.2)",
-        textMargin: [5, 0, 0, 0],
+        textMargin: [5, 5, 0, 5],
+        textEllipsis: false,
         tool: {
-          x: 50,
-          y: 30,
+          x: 30,
+          y: 0,
           width: 15,
           height: 15,
           bgColor: "green"

@@ -1,6 +1,6 @@
 # React-flow-component
 
-基于react+typescript开发，react生态下的work-flow组件，提供单根节点的SingleFlow组件和不限制根节点的MultipleFlow组件。
+基于react+typescript开发，react生态下的work-flow组件，提供不限制根节点的MultipleFlow组件。
 
 ### 安装方法
 
@@ -14,8 +14,8 @@ yarn add react-flow-component
 
 ### 引入
 
-``` import { MultipleFlow } from 'react-flow-component' 
-
+``` 
+import { MultipleFlow } from 'react-flow-component' 
 ```
 
 ``` <MultipleFlow rectConfig={{ width: 100, height:30 }} flowNodes={flowNodes}></MultipleFlow> ```
@@ -49,14 +49,12 @@ yarn add react-flow-component
 |  ----  | ----  |  ----  | ----  |
 | flowNodes  | flow节点 |nodeType[]  | - |
 | flowLines  | flow线条 |lineType[]  | - |
-| rectConfig  | flow节点统一配置项 |rectCofigType  | - |
-| lineCofig  | flow连线配置项 |lineCofigType  | - |
+| rectConfig  | flow节点统一配置项 |rectConfig  | - |
+| lineCofig  | flow连线配置项 |lineCofig  | - |
 | onDBClick  | 节点为可编辑事件双击会触发 |(val)=>void  | - |
 | onChange  | 节点的位置、删除、线条等改变触发 |(val：nodeType[])=>void  | - |
 | onConnect  | 节点连接触发 |({FNode:nodeType, ENode:nodeType})=>void  | - |
-| onChangePosition  | 画布位移触发 |({
-  translateX:number, translateY:number
-})=>void  | - |
+| onChangePosition  | 画布位移触发 |({translateX:number, translateY:number})=>void  | - |
 
 ##### Flow节点统一配置项 rectConfig
 
@@ -76,7 +74,6 @@ yarn add react-flow-component
 | textAlign  | 节点字体水平位置 | center \| left \| right | center |
 | fontSize  | 节点显示文本的字体大小 |string | 12px |
 | txtColor| 节点的字体颜色 |string | #000000 |
-| align| 节点字体水平位置 |string|水平垂直居中显示 left\|center \| right |
 | tool  | 节点上的按钮 | toolType | - |
 | textEllipsis  | 文本省略 | boolean | false |
 
